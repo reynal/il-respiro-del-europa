@@ -19,8 +19,8 @@ public class Preferences {
 	private static String fileName = DEFAULT_FILE;
 	
 	public static enum Key {
-		AUDIO_IN,
-		PLATFORM // one of PLATFORM enum
+		MIXER,
+		PLATFORM // one of PLATFORM enuml
 	}
 	
 	

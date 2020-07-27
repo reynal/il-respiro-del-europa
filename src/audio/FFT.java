@@ -41,9 +41,7 @@ public class FFT {
         if (n == 1) return new Complex[] { x[0] };
 
         // radix 2 Cooley-Tukey FFT
-        if (n % 2 != 0) {
-            throw new IllegalArgumentException("n is not a power of 2");
-        }
+        // syd if (n % 2 != 0) throw new IllegalArgumentException("n is not a power of 2");
 
         // compute FFT of even terms
         Complex[] even = new Complex[n/2];
@@ -219,7 +217,7 @@ public class FFT {
 
         // original data
         for (int i = 0; i < n; i++) {
-            x[i] = new Complex(i, 0);
+            x[i] = new Complex(1, 0);
         }
         show(x, "x");
 

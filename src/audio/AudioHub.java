@@ -2,16 +2,12 @@ package audio;
 
 import java.util.*;
 
+import static audio.AudioConstants.*;
+
 import javax.sound.sampled.*;
 
 public class AudioHub {
 	
-	public static final int SAMPLE_FREQ = 24000;
-	public static final int SAMPLE_SIZE_BYTE = 1;
-	public static final int CHANNELS = 1;
-	public static final boolean IS_BIG_ENDIAN = true;
-	public static final boolean IS_SIGNED = true;
-
 	/** 
 	 * Return a line that's appropriate for recording sound from a microphone.
 	 * example of use: TargetDataLine line = obtainInputLine("Unknown USB Audio Device");
@@ -34,7 +30,7 @@ public class AudioHub {
 	public static void printMixers()  {
 		
 		System.out.println("Mixers:");
-		Arrays.stream(AudioSystem.getMixerInfo()).forEach(e -> System.out.println("\t " + e.getName() + "(" + e.getDescription() + " by " + e.getVendor() + ")"));
+		Arrays.stream(AudioSystem.getMixerInfo()).forEach(e -> System.out.println("\t name=\"" + e.getName() + "\" description/vendor = (" + e.getDescription() + " by " + e.getVendor() + ")"));
 		
 	}
 
@@ -51,7 +47,7 @@ public class AudioHub {
 	 */
 	public static void printTargetDataLines(Mixer.Info info) {
 		
-		System.out.println("Input lines for mixer name \""+info.getName() + "\":");
+		System.out.println("\nInput lines for mixer name \""+info.getName() + "\" description = " + info.getDescription() + " by " + info.getVendor() + ":");
 		Arrays.stream(AudioSystem.getMixer(info).getTargetLineInfo()).filter(e -> e.getLineClass().equals(TargetDataLine.class)).forEach(e -> System.out.println("\t"+e));
 		
 	}
@@ -65,8 +61,9 @@ public class AudioHub {
 	public static void main(String[] args) throws Exception {
 		
 		printTargetDataLines();
-		TargetDataLine line = obtainInputLine("Unknown USB Audio Device");
-		System.out.println(line);
+		//printMixers();		
+		//TargetDataLine line = obtainInputLine("U0x46d0x825 [plughw:1,0]");
+		//System.out.println(line);
 	}
 	
 }
