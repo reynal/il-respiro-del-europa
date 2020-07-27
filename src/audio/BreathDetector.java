@@ -9,6 +9,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Usage:
+ * @author sydxrey
+ *
+ */
 public class BreathDetector {
 
 	AudioSignal signal;

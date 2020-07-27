@@ -1,0 +1,16 @@
+# properties file for respiro project:
+#
+# ===== hardware =====
+#
+# platform: RASPBERRYPI or DESKTOP ; comment out to let java choose
+#PLATFORM=desktop
+PLAFORM=raspberrypi
+#
+# audio mixer:
+# camera usb du mac mini de syd:
+MIXER=Unknown USB Audio Device
+#
+# shield audio Cirrus de la RPi4 (micro placé sur le shield):
+#MIXER=RPiCirrus [default]
+# camera USB sur RPi:
+#MIXER=U0x46d0x825 [plughw:1,0]

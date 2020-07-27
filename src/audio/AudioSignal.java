@@ -5,6 +5,7 @@ import static audio.AudioConstants.*;
 import java.io.*;
 import javax.sound.sampled.*;
 
+
 public class AudioSignal {
 	
 	private byte[] samplesBuffer = new byte[BUF_LEN]; // backing buffer
@@ -41,7 +42,6 @@ public class AudioSignal {
 		}
 		sum /= BUF_LEN_SAMPLES;
 		return 10 * Math.log(sum);
-
 	}
 
 	public void writeToFile(){

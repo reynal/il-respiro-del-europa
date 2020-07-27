@@ -38,11 +38,11 @@ public class Microphone extends Thread {
 
 		line.start();
 
-		//int ii = 0;
+		int ii = 0;
 		while (audioSignal.acquire(line) != -1) {
 			System.out.println(audioSignal.level_dB());
-			// if (ii++ > 0) break;
-			break;
+			if (ii++ > 10) break;
+			//break;
 		}
 
 		line.stop();
@@ -54,6 +54,7 @@ public class Microphone extends Thread {
 
 	public static void main(String[] args) throws Exception {
 
+		System.out.println("microphone");
 		AudioSignal s = new AudioSignal();
 		Microphone m = new Microphone(s);
 		m.start();
