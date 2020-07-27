@@ -61,13 +61,16 @@ public class BreathDetector {
 	}
 
 	/**
-	 * @return the intensity of breathing in the current signal, or 0.0 if no breathing detected
+	 * @return true if the current signal resembles a breath
+	 * 
+	 * TODO : la je regarde juste le ratio entre le peak du maximum et la moyenne. Il faudrait regarder la repartition des peaks (entropie),
+	 * et aussi comme tu le suggeres Claudio, la forme en 1/f de la DSP.
 	 */
-	public double measureBreath() { 
+	public boolean isBreath() { 
 		
 		if (signal.level_dB() < SILENCE_THRESHOLD_DB) {
 			out("BreathDectector: signal below threshold");
-			return 0.0;
+			return false;
 		}
 
 		// reinit FFT temp buffer:
@@ -96,8 +99,8 @@ public class BreathDetector {
 		out("BreathDectector: FFT max=" + fftAbsMaxValue);
 		out("BreathDectector: FFT harmonic ratio=" + (fftAbsMaxValue/fftAbsMean));
 		
-		if (fftAbsMaxValue / fftAbsMean > HARMONIC_RATIO_THRESHOLD) return 0.0;
-		else return fftAbsMaxValue / fftAbsMean;
+		if (fftAbsMaxValue / fftAbsMean > HARMONIC_RATIO_THRESHOLD) return false;
+		else return true;
 				
 	}
 	

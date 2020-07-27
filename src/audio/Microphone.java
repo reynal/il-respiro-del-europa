@@ -112,8 +112,8 @@ public class Microphone extends Thread {
 		LOGGER.info("Microphone thread started");
 
 		while (isRunning && audioSignal.acquire(line) != -1) {
-			out("Signal level =" + audioSignal.level_dB() + " dB");
-			out("BreathDetector : " + breathDetector.measureBreath());
+			out("BreathDetector : " + (breathDetector.isBreath() ? "BREATH!!!" : ""));
+			out("Breath power =" + audioSignal.level_dB() + " dB");
 			if (DEBUG_SAVE_WAVE) audioSignal.saveToFile(waveDos);
 			if (DEBUG_SAVE_FFT) breathDetector.saveToFile(fftDos);
 		}
