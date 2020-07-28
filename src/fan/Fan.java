@@ -59,11 +59,11 @@ public class Fan {
 	}
 		
 	public void start() {
-		setState(true);
+		setState(false);
 	}
 	
 	public void stop() {
-		setState(false);
+		setState(true);
 	}
 	
 	/**
@@ -90,25 +90,25 @@ public class Fan {
 	}
 
 	Task createStartTask() {
-		return new Task(true);
+		return new Task(false);
 	}
 
 	Task createStopTask() {
-		return new Task(false);
+		return new Task(true);
 	}
 
 	// ------------------------- test -------------------------------------
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		Fan v = new Fan(FAN_0);
+		Fan v = new Fan(FAN_2);
 		int i=0;
 		boolean active = false;
 		while(i++ < 10) {
 			System.out.println(i);
 			v.setState(active);
 			active = !active;
-			Thread.sleep((int)(1000 * Math.random()));
+			Thread.sleep((int)(1000));// * Math.random()));
 		}
 	}
 

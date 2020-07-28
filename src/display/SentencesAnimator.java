@@ -11,7 +11,7 @@ import javax.swing.Timer;
 
 public class SentencesAnimator implements ActionListener {
 	
-	public static final int TIMER_PERIOD_MS = 50; // ms
+	public static final int TIMER_PERIOD_MS = 10; // ms
 	
 	private Timer timer;
 	private double time;

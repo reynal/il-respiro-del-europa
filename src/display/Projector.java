@@ -11,7 +11,7 @@ import javax.swing.*;
  *
  */
 @SuppressWarnings("serial")
-public class Projector extends JFrame { // JWindow
+public class Projector extends JWindow {
 
 	private AnimationConstants screen;
 	private float alpha;

@@ -15,8 +15,8 @@ public class WindWave {
 	private Timer timer;
 	//private ArrayList<TimerTask> taskList = new ArrayList<TimerTask>();
 	
-	public static final int PERIOD_IDLE = 5000;
-	public static final int DURATION_IDLE = 500;
+	public static final int PERIOD_IDLE = 10000;
+	public static final int DURATION_IDLE = 4000;
 	
 	public static final int PERIOD_CHAOS = 10000;
 	public static final int DURATION_CHAOS= 4900;
@@ -78,8 +78,8 @@ public class WindWave {
 		
 		WindWave w = new WindWave();
 		w.setState(WindWave.State.IDLE);
-		Thread.sleep(20000);
-		w.setState(WindWave.State.CHAOS);
+		//Thread.sleep(20000);
+		//w.setState(WindWave.State.CHAOS);
 	}
 	
 	
