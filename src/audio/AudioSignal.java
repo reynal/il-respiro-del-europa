@@ -92,7 +92,7 @@ public class AudioSignal {
 		
 		String file = "wave.bin";
 		if (args.length>0) file = args[0];
-		TargetDataLine line = AudioHub.obtainInputLine("Unknown USB Audio Device");
+		TargetDataLine line = AudioHub.obtainInputLine("USB Audio Device");
 		DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		AudioSignal as = new AudioSignal();
 

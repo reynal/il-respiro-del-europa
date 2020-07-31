@@ -96,7 +96,7 @@ public class FFT {
 
     }
 
-    // compute the circular convolution of x and y
+    // compute the circular convolution of x and y*
     public static Complex[] cconvolve(Complex[] x, Complex[] y) {
 
         // should probably pad x and y with 0s so that they have same length
@@ -114,13 +114,30 @@ public class FFT {
         // point-wise multiply
         Complex[] c = new Complex[n];
         for (int i = 0; i < n; i++) {
-            c[i] = a[i].times(b[i]);
+            c[i] = a[i].times(b[i].conjugate());
         }
 
         // compute inverse FFT
         return ifft(c);
     }
 
+    // compute the circular acf of x from its fft y
+    public static Complex[] cacf_fft(Complex[] y) {
+
+        int n = y.length;
+
+        // point-wise norm^2
+        Complex[] c = new Complex[n];
+        c[0] = y[0].norm2();
+        for (int i = 1; i < n/2; i++) {
+            c[i] = y[i].norm2();
+            c[n-i] = c[i];
+        }
+        c[n/2] = y[n/2].norm2();
+
+        // compute inverse FFT
+        return ifft(c);
+    }
 
     // compute the linear convolution of x and y
     public static Complex[] convolve(Complex[] x, Complex[] y) {

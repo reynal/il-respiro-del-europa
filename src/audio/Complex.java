@@ -54,6 +54,11 @@ public class Complex {
     public double abs() {
         return Math.hypot(re, im);
     }
+    
+    // return squared norm in re, im=0
+    public Complex norm2() {
+        return new Complex(re*re+im*im,0);
+    }
 
     // return angle/phase/argument, normalized to be between -pi and pi
     public double phase() {

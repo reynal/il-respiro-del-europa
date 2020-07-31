@@ -61,7 +61,7 @@ public class AudioHub {
 	public static void main(String[] args) throws Exception {
 		
 		printTargetDataLines();
-		//printMixers();		
+		printMixers();		
 		//TargetDataLine line = obtainInputLine("U0x46d0x825 [plughw:1,0]");
 		//System.out.println(line);
 	}
