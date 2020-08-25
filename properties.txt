@@ -9,6 +9,10 @@ PLAFORM=raspberrypi
 # audio mixer:
 # camera usb du mac mini de syd:
 MIXER=Unknown USB Audio Device
+# carte usb de Claudio:
+#MIXER=USB Audio Device
+#MIXER=Default Audio Device
+#MIXER=Port H2n
 #
 # shield audio Cirrus de la RPi4 (micro placé sur le shield):
 #MIXER=RPiCirrus [default]

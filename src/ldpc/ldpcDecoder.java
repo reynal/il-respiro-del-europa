@@ -6,6 +6,7 @@ import java.math.*;
 import java.io.*;
 import javax.swing.*;
 /**
+ * LDPC decoder class
  * Skeleton of class taken from https://github.com/chsasank/LDPC-Codes 
  * Author: Sasank Chilamkurthy
  * Implementation taken from http://read.pudn.com/downloads40/sourcecode/windows/comm/141638/SumProductDecoder.java__.htm// SumProductDecodere.java  
@@ -14,6 +15,7 @@ import javax.swing.*;
 //  
 // (C) Tadashi Wadayama, 2002  
 **/
+
 public class ldpcDecoder {
   public int tmp_bit[];     // tentative decision word  
   public double posterior[];    // log likelihood ratio  
@@ -38,7 +40,7 @@ public class ldpcDecoder {
   * Initializes decoder with parity check matrix read from a specially formated file.
   * Files should be in format specified here: http://www.inference.phy.cam.ac.uk/mackay/codes/alist.html
   * chaos: code adapted to match alist format
-  * @param filename
+  * @param filename, damping factor for the messages (1.0 is standard) 
   * @throws IOException
   */
   public ldpcDecoder(String filename, double _damping) throws IOException{
@@ -105,6 +107,14 @@ public class ldpcDecoder {
             
   }
 
+  /**
+   * Runs the decoder iterations (up to loop_max iterations, stops early if parity check is satisfied
+   * Calls LDPC.updateImages() at each iteration with the new posterior bit=0 probabilities 
+   * TO FIX: hardcoded delay (should go into updateImages, resp. multithread solution)
+   * @param lambda: array of channel LLR inputs (noise) 
+   * @param loop_max: max number of iterations
+   * @return decoded word (TO FIX: remove for efficiency)
+   */
   public int[] Decode(double lambda[], int loop_max) { //, JWindow w1, GraphicsPanel p1, JWindow w2, GraphicsPanel p2){ 
     // return value: 0 if valid parity check, -1 otherwise 
     // new return value is decoded word

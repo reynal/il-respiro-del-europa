@@ -29,8 +29,8 @@ public class Microphone extends Thread {
 	private BreathDetector breathDetector; 
 	private boolean isRunning; // makes it possible to "terminate" thread
 	
-	public static final boolean DEBUG_SAVE_WAVE = true;
-	public static final boolean DEBUG_SAVE_FFT = true;
+	public static final boolean DEBUG_SAVE_WAVE = false;
+	public static final boolean DEBUG_SAVE_FFT = false;
 	
 
 	/**
@@ -112,8 +112,9 @@ public class Microphone extends Thread {
 		LOGGER.info("Microphone thread started");
 
 		while (isRunning && audioSignal.acquire(line) != -1) {
+			//breathDetector.isBreath();
 			out("BreathDetector : " + (breathDetector.isBreath() ? "BREATH!!!" : ""));
-			out("Breath power =" + audioSignal.level_dB() + " dB");
+			//out("Breath power =" + audioSignal.level_dB() + " dB");
 			if (DEBUG_SAVE_WAVE) audioSignal.saveToFile(waveDos);
 			if (DEBUG_SAVE_FFT) breathDetector.saveToFile(fftDos);
 		}

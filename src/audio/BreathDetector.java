@@ -30,6 +30,7 @@ public class BreathDetector {
 
 	private static final Logger LOGGER = Logger.getLogger("confLogger");
 	
+	// FREQ_MIN currently ignored
 	public static final double FREQ_MIN = 100; // filter out frequencies below this value (in Hz) 
 	public static final double SILENCE_THRESHOLD_DB = -75; // -55 anything below is considered silence
 	public static final double HARMONIC_RATIO_THRESHOLD = 15.0; // 
@@ -85,7 +86,7 @@ public class BreathDetector {
 	public boolean isBreath() { 
 		
 		if (signal.level_dB() < SILENCE_THRESHOLD_DB) {
-			out("BreathDectector: signal below threshold");
+			//out("BreathDectector: signal below threshold");
 			return false;
 		}
 
@@ -139,14 +140,14 @@ public class BreathDetector {
 		Complex[] acf = FFT.cacf_fft(y);
 		//Complex[] acf = FFT.convolve(x,x);
 		//testing: save acf to fft_abs
-		for (int i=0; i<BUF_LEN_SAMPLES/2; i++) { 
-			fftAbs[i] = acf[i].re();
-			//if (acf[i].im()*acf[i].im() > 0.0001) {
-			//	out("imaginary part in acf");
-			//}
-		}
+//		for (int i=0; i<BUF_LEN_SAMPLES/2; i++) { 
+//			fftAbs[i] = acf[i].re();
+//			//if (acf[i].im()*acf[i].im() > 0.0001) {
+//			//	out("imaginary part in acf");
+//			//}
+//		}
 		
-		feature[0] = 0; //unused
+		feature[0] = fftAbsMaxValue / fftAbsMean; // harmonic ratio, Syd
 		feature[1] = Math.log(band1/band2);
 		feature[2] = Math.log(band1/band3);
 		feature[3] = Math.log(band1/band4);
@@ -155,16 +156,68 @@ public class BreathDetector {
 		feature[6] = Math.log(band3/band4);
 		feature[7] = fCentroid;
 		feature[8] = fAbsMax;
-		feature[9] = 1; //tbd
+		feature[9] = rel_max_acf_peak(acf);
 		
-		out("BreathDectector: FFT features = " +Arrays.toString(feature));
-		out("BreathDectector: FFT mean=" + fftAbsMean);
-		out("BreathDectector: FFT max=" + fftAbsMaxValue);
-		out("BreathDectector: FFT harmonic ratio=" + (fftAbsMaxValue/fftAbsMean));
+		//out(Arrays.toString(feature));
+		//out("BreathDectector: FFT mean=" + fftAbsMean);
+		//out("BreathDectector: FFT max=" + fftAbsMaxValue);
+		//out("BreathDectector: FFT harmonic ratio=" + (fftAbsMaxValue/fftAbsMean));
+
+		double score = 0.0;
+		if (feature[0]>50) // feature 0 > 45 is voice
+			score -= 1.0;
+		if (feature[2]<-2.0) // clutter
+			score -= 1.0;
+		if (feature[3]<-2.0) // clutter
+			score -= 0.8;
+		if (feature[6]<-1.5) // clutter
+			score -= 0.8;
+		if ((feature[8]<1000) & (feature[9]>0.38)) // voice
+			score -= 1.0;
+		if ((feature[7]>1000) & (feature[7]<3000) & (feature[8]>1000) & (feature[8]<3000) )
+			score += 1.0; // breath
+		if (feature[9]<0.38)
+			score += 0.2; // breath
+		if (feature[9]<0.25)
+			score += 0.9; // breath
 		
-		if (fftAbsMaxValue / fftAbsMean > HARMONIC_RATIO_THRESHOLD) return false;
-		else return true;
+		return (score>0.0);
+//		if (fftAbsMaxValue / fftAbsMean > HARMONIC_RATIO_THRESHOLD) return false;
+//		else return true;
 				
+	}
+	/**
+	 * Seeks max peak in beginning of acf and divides by acf[0]
+	 * @param acf: autocorr fct (stored in real part)
+	 * @return peak/acf[0]
+	 */
+	private double rel_max_acf_peak(Complex [] acf) {
+		int m = 5; // peak within +- m points
+		double mp = 1e-6;
+		double lmax = acf[0].re();
+		double lmin = acf[0].re();
+		int imin = 0;
+		int imax = 0;
+		for (int i=1; i<SAMPLE_FREQ/80; i++) { //down to 80 Hz or so 
+		    if (acf[i].re() > lmax) {
+		      lmax = acf[i].re();
+		      imax = i;
+		    } else if (acf[i].re() < lmin) {
+		      lmin = acf[i].re();
+		      imin = i;
+		    }
+		    if (i-imin == m) { // seek next max now
+		      lmax = acf[i].re();
+		      imax = i;
+		    } else if ((imax-imin>=m) && (i-imax == m)) { // peak found
+		    	if (lmax>mp)
+		    		mp = lmax;		     
+		
+		    	lmin = acf[i].re(); // seek next min
+		    	imin = i;
+		    }   
+		}
+		return mp/acf[0].re();
 	}
 	
 	/**

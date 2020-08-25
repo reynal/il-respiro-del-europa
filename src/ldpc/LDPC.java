@@ -146,7 +146,12 @@ public class LDPC {
         //System.out.println("Compare this to ber before decoding = "+ 0.02);
         
     }
-    
+    /**
+     * Will be called from ldpc decoder at each iteration
+     * to update (alpha) images based on probabilities
+     * and display them
+     * @param q0: probabilities bit=0
+     */
     public static void updateImages (double[] q0) {
         int n = q0.length;
         double sum = 0.0;
@@ -161,6 +166,12 @@ public class LDPC {
         //w12.repaint();        
     }
     
+    /**
+     * Generate binary symmetric noise
+     * @param n: vector length
+     * @param p: error probability
+     * @return: noise vector
+     */
     private static double[] BSCnoise (int n, double p) {
         double ret[] = new double[n];
         double llr = Math.log((1-p)/p);
@@ -169,6 +180,13 @@ public class LDPC {
         return ret;
     }
     
+    /**
+     * Draw a multiline string into a graphics
+     * @param g: graphics
+     * @param text
+     * @param x: hor position
+     * @param y
+     */
     private static void drawString(Graphics g, String text, int x, int y) {
         int lineHeight = g.getFontMetrics().getHeight();
         for (String line : text.split("\n"))
