@@ -5,7 +5,7 @@ import java.awt.*;
 import javax.swing.*;
 
 /**
- * Test class for dual screen display
+ * Correspond a un video projecteur. 
  * 
  * @author sydxrey
  *
@@ -16,6 +16,10 @@ public class Projector extends JWindow {
 	private AnimationConstants screen;
 	private float alpha;
 
+	/**
+	 * 
+	 * @param screen une des deux sorties video
+	 */
 	public Projector(AnimationConstants screen) {
 
 		super(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[screen.ordinal()]
@@ -35,6 +39,10 @@ public class Projector extends JWindow {
 		return screen;
 	}
 	
+	/**
+	 * Change the alpha composite parameter for this video projector
+	 * @param alpha
+	 */
 	public void setAlpha(float alpha) {
 		this.alpha = alpha;
 		repaint();
@@ -69,7 +77,7 @@ public class Projector extends JWindow {
 			
 			g.setPaint(Color.WHITE);
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));			
-            Font font = new Font("Serif", Font.PLAIN, 50); // TODO : improve font!
+            Font font = new Font("Serif", Font.PLAIN, 50); // TODO : improve font! (TTF)
             g.setFont(font);
             String s = fetchSentence();
             int textWidth = g.getFontMetrics().stringWidth(s);

@@ -24,6 +24,9 @@ import javax.sound.sampled.TargetDataLine;
  * A discriminating algorithm between a breath audio signal and a simple conversation of visitors in front of the microphone.
  * 
  * @author sydxrey
+ * 
+ * TODO (pour claudio) :
+ * -
  *
  */
 public class BreathDetector {

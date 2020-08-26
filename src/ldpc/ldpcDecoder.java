@@ -16,7 +16,8 @@ import javax.swing.*;
 // (C) Tadashi Wadayama, 2002  
 **/
 
-public class ldpcDecoder {
+public class ldpcDecoder extends Thread {
+	
   public int tmp_bit[];     // tentative decision word  
   public double posterior[];    // log likelihood ratio  
   
@@ -33,6 +34,12 @@ public class ldpcDecoder {
   public int row_list[][];  
   public int col_list_r[][];  
   public int col_list_c[][];  
+  
+  double[] q0 = new double[n]; // acces package provisoire
+  
+  // used by decode:
+  double lambda[];
+  int loop_max;
 
 
     
@@ -43,10 +50,12 @@ public class ldpcDecoder {
   * @param filename, damping factor for the messages (1.0 is standard) 
   * @throws IOException
   */
-  public ldpcDecoder(String filename, double _damping) throws IOException{
-    damping = _damping;  
-    try (BufferedReader in = new BufferedReader(new FileReader(filename)))
-    {
+  public ldpcDecoder(String filename, double _damping) throws IOException {
+	  
+    damping = _damping;
+    
+    try (BufferedReader in = new BufferedReader(new FileReader(filename))) {
+    	
         String input = in.readLine();  
         StringTokenizer t = new StringTokenizer(input);  
         // n = number of bits (columns)
@@ -115,7 +124,17 @@ public class ldpcDecoder {
    * @param loop_max: max number of iterations
    * @return decoded word (TO FIX: remove for efficiency)
    */
-  public int[] Decode(double lambda[], int loop_max) { //, JWindow w1, GraphicsPanel p1, JWindow w2, GraphicsPanel p2){ 
+  //public int[] decode(double lambda[], int loop_max) { //, JWindow w1, GraphicsPanel p1, JWindow w2, GraphicsPanel p2){
+  public void decode(double lambda[], int loop_max) { //, JWindow w1, GraphicsPanel p1, JWindow w2, GraphicsPanel p2){
+	  
+	  this.lambda = lambda;
+	  this.loop_max = loop_max;
+	  
+	  start();
+  }
+  
+  public void run() {
+	  
     // return value: 0 if valid parity check, -1 otherwise 
     // new return value is decoded word
     // lambda: log likelihood ratio, loop_max: maximum number of iterations  
@@ -134,7 +153,7 @@ public class ldpcDecoder {
     double sum, tmp;  
     int prod;  
     posterior = new double[n]; 
-    double[] q0 = new double[n];
+    //double[] q0 = new double[n]; moved in class fields so that we can access it from outside 
     int f,parity;  
     
     for (int loop = 1; loop <= loop_max; loop++) { // start of iteration  
@@ -163,7 +182,7 @@ public class ldpcDecoder {
                 = sum-alpha[col_list_r[i][j]][col_list_c[i][j]];  
             }             
             posterior[i] = lambda[i] + sum; 
-            q0[i] = Math.exp(posterior[i])/(1+Math.exp(posterior[i]));
+            q0[i] = Math.exp(posterior[i])/(1+Math.exp(posterior[i])); // beliefs
             if (posterior[i] >0) tmp_bit[i] = 0;  
             else tmp_bit[i] = 1;  
         }               
@@ -173,8 +192,7 @@ public class ldpcDecoder {
         // System.out.println("\n");  
            // chaos 
         
-        try
-        {
+        try {
             Thread.sleep(100);     
         }
         catch(InterruptedException ex)
@@ -205,10 +223,13 @@ public class ldpcDecoder {
         }  
         */
   
-    }               // end of iterations  
-    return tmp_bit; //ret;  
+    }               // end of iterations
+    
+    // SYD : unused ? return tmp_bit; //ret;  
     
   }  
+  
+  // 
        
         
                     // sign function  

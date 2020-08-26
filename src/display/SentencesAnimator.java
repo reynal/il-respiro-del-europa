@@ -8,7 +8,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
 
-
+/**
+ * Class responsible for the visual animation of the sentence display
+ * on the two video projectors.
+ * 
+ * @author sydxrey
+ *
+ */
 public class SentencesAnimator implements ActionListener {
 	
 	public static final int TIMER_PERIOD_MS = 10; // ms
@@ -16,7 +22,8 @@ public class SentencesAnimator implements ActionListener {
 	private Timer timer;
 	private double time;
 	
-	Projector projector1, projector2;	
+	private Projector projector1, projector2;	
+	
 	
 	public SentencesAnimator() {
 
@@ -26,6 +33,8 @@ public class SentencesAnimator implements ActionListener {
 		projector2 = new Projector(SCREEN_1);
 
 		timer = new Timer(TIMER_PERIOD_MS, this);
+		
+		start();
 	}
 	
 	public void start() {
@@ -48,6 +57,7 @@ public class SentencesAnimator implements ActionListener {
 		double f3 = 0.001 * TIMER_PERIOD_MS / T3;
 		
 		float alpha = (float)(0.5 + sine(a1, f1) + sine(a2, f2) + sine(a3, f3) + 0.1 * Math.random());
+		// TODO : make it go to zero slowly (20'/30')
 		alpha = Math.max(alpha, 0);
 		alpha = Math.min(alpha, 1);
 		p.setAlpha(alpha);
@@ -63,7 +73,7 @@ public class SentencesAnimator implements ActionListener {
 
 	public static void main(String[] args) throws Exception {
 
-		new SentencesAnimator().start();
+		new SentencesAnimator();
 	}
 
 }

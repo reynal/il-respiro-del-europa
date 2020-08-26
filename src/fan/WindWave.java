@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 /**
  * a class that can create a kind of wave using fans driven by GPIO pins on a RPi.
  * @author sydxrey
+ * 
+ * TODO : random period
  *
  */
 public class WindWave {
@@ -25,9 +27,10 @@ public class WindWave {
 		IDLE,
 		CHAOS
 	}
+	// TODO : intensity ! 0-100%
 
 	/**
-	 * 
+	 * Start a WindWave in default state "IDLE"
 	 */
 	public WindWave() {
 		fans = new Fan[4];
@@ -35,6 +38,9 @@ public class WindWave {
 		fans[1] = new Fan(Fan.FAN_1);
 		fans[2] = new Fan(Fan.FAN_2);
 		fans[3] = new Fan(Fan.FAN_3);
+		
+		setState(WindWave.State.IDLE);
+
 	}
 	
 	/**
@@ -62,6 +68,7 @@ public class WindWave {
 		case IDLE:
 			schedule(0, 0, 					PERIOD_IDLE, DURATION_IDLE);
 			schedule(1, PERIOD_IDLE / 2, 	PERIOD_IDLE, DURATION_IDLE);
+			
 			break;
 		
 		case CHAOS:
@@ -78,8 +85,8 @@ public class WindWave {
 		
 		WindWave w = new WindWave();
 		w.setState(WindWave.State.IDLE);
-		//Thread.sleep(20000);
-		//w.setState(WindWave.State.CHAOS);
+		Thread.sleep(20000);
+		w.setState(WindWave.State.CHAOS);
 	}
 	
 	

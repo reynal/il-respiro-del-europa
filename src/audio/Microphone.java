@@ -48,6 +48,8 @@ public class Microphone extends Thread {
 		initShutdownHook();
 		initAudioLine();
 		
+		start();
+		
 	}
 	
 	/**
@@ -127,7 +129,6 @@ public class Microphone extends Thread {
 	public static void main(String[] args) throws Exception {
 
 		Microphone m = new Microphone();
-		m.start();
 
 	}
 

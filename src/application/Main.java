@@ -7,6 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import audio.Microphone;
+import display.SentencesAnimator;
+import fan.WindWave;
+
 public class Main {
 	
 	private static final Logger LOGGER = Logger.getLogger("confLogger");
@@ -62,7 +66,17 @@ public class Main {
 	
 	public static void main(String[] args) throws Exception {
 		//System.out.println("ciao mundo");
-		testLogger();
+		//testLogger();
+		
+		// record sound and check for breathing:
+		Microphone microphone = new Microphone();
+		
+		// start the thread for sentence animation
+		SentencesAnimator sa = new SentencesAnimator();
+	
+		WindWave w = new WindWave();
+		
+		
 	}
 
 }

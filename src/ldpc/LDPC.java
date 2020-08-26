@@ -19,31 +19,41 @@ import javax.imageio.*;
 import javax.swing.*;
 
 /**
- * Contains Main method.
-
+ * 
  */
-
-
 public class LDPC {
-    private static BufferedImage img1 = null;
-    private static BufferedImage img2 = null;
-    private static BufferedImage img12 = null;
-    private static JWindow w1 = new JWindow();
-    private static JWindow w2 = new JWindow();
-    private static JWindow w12 = new JWindow();
-    private static GraphicsPanel p1 = null;
-    private static GraphicsPanel p2 = null;
-    private static CompositeTestPanel p12 = null;
-    private static double bsc_p = 0.09;
+	
+    private BufferedImage img1 = null;
+    private BufferedImage img2 = null;
+    private BufferedImage img12 = null;
+    private JWindow w1 = new JWindow();
+    private JWindow w2 = new JWindow();
+    private JWindow w12 = new JWindow();
+    private GraphicsPanel p1 = null;
+    private GraphicsPanel p2 = null;
+    private CompositeTestPanel p12 = null;
+    
+    private double bsc_p = 0.09; // TODO : doit dependre du souffle !
+    
+    // public double intensity = 0.0;
+    
+    //double getIntensity() { }
     
     
-    public static void main(String[] args) throws IOException {
+    /**
+     * 
+     * @throws IOException si pb ouverture du fichier contenant le code
+     */
+    public LDPC() throws IOException { // SR : was main()
+    	
         //Let's do a simulation to check post FEC BER 
         
         int n = 64800; //204; 204.33.486.txt
         int max_iter = 40;
         
         ldpcDecoder decoder = new ldpcDecoder("rate0.50_irreg_dvbs2_N64800.alist", 1.0);
+
+        // SR => claudio : tout ce code correspond a peu pres a SentencesAnimator et Projector...
         
         // Image dimensions 
         int width = 640, height = 320; 
@@ -125,10 +135,11 @@ public class LDPC {
         p12.setComposite(BlendComposite.Lighten);
         //w12.repaint(); setComposite does repaint()
         
+        // SR => claudio : en gros, we just keep this:
+        
         int numberOferrors = 0;
         int[] rec = new int[n];
         for(int i = 0; i<10; i++){
-            
         
             double noise[] = BSCnoise(n, bsc_p);
             
@@ -152,7 +163,8 @@ public class LDPC {
      * and display them
      * @param q0: probabilities bit=0
      */
-    public static void updateImages (double[] q0) {
+    public void updateImages (double[] q0) {
+    	
         int n = q0.length;
         double sum = 0.0;
         for (int i=0; i<n; i++) sum += q0[i];
@@ -172,7 +184,8 @@ public class LDPC {
      * @param p: error probability
      * @return: noise vector
      */
-    private static double[] BSCnoise (int n, double p) {
+    private double[] BSCnoise (int n, double p) {
+    	
         double ret[] = new double[n];
         double llr = Math.log((1-p)/p);
         for (int i=0; i<n; i++) 
@@ -187,13 +200,14 @@ public class LDPC {
      * @param x: hor position
      * @param y
      */
-    private static void drawString(Graphics g, String text, int x, int y) {
+    private void drawString(Graphics g, String text, int x, int y) {
         int lineHeight = g.getFontMetrics().getHeight();
         for (String line : text.split("\n"))
             g.drawString(line, x, y += 2*lineHeight);
     }
 }
 
+@SuppressWarnings("serial")
 class GraphicsPanel extends JPanel {
 
     private BufferedImage image;
@@ -250,7 +264,7 @@ class GraphicsPanel extends JPanel {
         g2.drawImage(image, new RescaleOp(
         new float[]{br, br, br, 1f}, // scale factors for red, green, blue, alpha
         new float[]{0, 0, 0, 0}, // offsets for red, green, blue, alpha
-        null), // You can supply RenderingHints here if you want to
+        null), // You can supply RenderingHints here if you want to //TODO : anti aliasing
         0, 0);
     }
 }
