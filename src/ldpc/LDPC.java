@@ -33,7 +33,6 @@ public class LDPC {
     private GraphicsPanel p2 = null;
     private CompositeTestPanel p12 = null;
     
-    private double bsc_p = 0.09; // TODO : doit dependre du souffle !
     
     // public double intensity = 0.0;
     
@@ -48,10 +47,10 @@ public class LDPC {
     	
         //Let's do a simulation to check post FEC BER 
         
-        int n = 64800; //204; 204.33.486.txt
-        int max_iter = 40;
         
-        ldpcDecoder decoder = new ldpcDecoder("rate0.50_irreg_dvbs2_N64800.alist", 1.0);
+        // SR int max_iter = 40;
+        
+        LdpcDecoder decoder = new LdpcDecoder(this);
 
         // SR => claudio : tout ce code correspond a peu pres a SentencesAnimator et Projector...
         
@@ -137,23 +136,24 @@ public class LDPC {
         
         // SR => claudio : en gros, we just keep this:
         
-        int numberOferrors = 0;
-        int[] rec = new int[n];
+        //int numberOferrors = 0;
+        //int[] rec = new int[n];
         for(int i = 0; i<10; i++){
         
-            double noise[] = BSCnoise(n, bsc_p);
+            //double noise[] = BSCnoise(n, bsc_p);
             
-            rec = decoder.Decode(noise, max_iter); //, w1, p1, w2, p2);
+            //rec = 
+        	decoder.initState(); //, w1, p1, w2, p2);
             
-            for(int j = 0; j<n; j++){
+            /*for(int j = 0; j<n; j++){
                 if(rec[j] ==1){
                     numberOferrors = numberOferrors+1;
                     break;
                 }
-            }
+            }*/
         }
         
-        System.out.println("Bit error rate after decoding = "+ ((double)numberOferrors)/204000);
+        //System.out.println("Bit error rate after decoding = "+ ((double)numberOferrors)/204000);
         //System.out.println("Compare this to ber before decoding = "+ 0.02);
         
     }
@@ -168,6 +168,7 @@ public class LDPC {
         int n = q0.length;
         double sum = 0.0;
         for (int i=0; i<n; i++) sum += q0[i];
+        double bsc_p = 0.09; // TODO : doit dependre du souffle !?
         float per = (float)Math.min(1.0, 0.5*(1.0-(sum/(double)n))/bsc_p);
         System.out.println("per = "+per);
         p1.modImage(q0,1.0f-per); // was q0=Pr(x_i=0)
@@ -178,20 +179,6 @@ public class LDPC {
         //w12.repaint();        
     }
     
-    /**
-     * Generate binary symmetric noise
-     * @param n: vector length
-     * @param p: error probability
-     * @return: noise vector
-     */
-    private double[] BSCnoise (int n, double p) {
-    	
-        double ret[] = new double[n];
-        double llr = Math.log((1-p)/p);
-        for (int i=0; i<n; i++) 
-           ret[i] = (Math.random()<p?-llr:llr);
-        return ret;
-    }
     
     /**
      * Draw a multiline string into a graphics
