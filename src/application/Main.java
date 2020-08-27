@@ -11,6 +11,23 @@ import audio.Microphone;
 import display.SentencesAnimator;
 import fan.WindWave;
 
+/**
+ * 
+ * Claudio : display/ldpc
+ * - integrer LDPC dans Projector / SentencesAnimator
+ * - raffinement : quand et comment choisir une nouvelle paire de phrases ?
+ * 
+ * Syd : fan/application
+ * - UI
+ * - WindWave.breath()
+ * - une classe pour récupérer une paire de phrases depuis un fichier
+ * - 
+ * 
+ * 
+ * 
+ * @author sydxrey
+ *
+ */
 public class Main {
 	
 	private static final Logger LOGGER = Logger.getLogger("confLogger");

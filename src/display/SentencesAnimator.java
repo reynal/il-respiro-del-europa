@@ -96,7 +96,7 @@ public class SentencesAnimator implements ActionListener {
 		float alpha = (float)(0.5 + sine(a1, f1) + sine(a2, f2) + sine(a3, f3) + 0.1 * Math.random());
 		alpha = Math.max(alpha, 0);
 		alpha = Math.min(alpha, 1);
-		alpha = 0f; // debug
+		//alpha = 0f; // debug
 
 		projector1.setAlpha(alpha * chaosIntensity);
 		projector2.setAlpha((1-alpha) * chaosIntensity);
