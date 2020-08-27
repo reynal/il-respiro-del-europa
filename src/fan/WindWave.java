@@ -81,7 +81,10 @@ public class WindWave {
 	
 	public void breath(double force) {
 		
-		System.out.println("WindWave: breath with force "+force);
+		if (force <= 0.0) return; // DO NOTHING if no breath detected 
+		else {
+			System.out.println("WindWave: breath with force "+force);
+		}
 	}
 	
 	

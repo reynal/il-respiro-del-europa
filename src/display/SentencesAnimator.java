@@ -45,6 +45,8 @@ public class SentencesAnimator implements ActionListener {
 							// and then  chaosIntensity += dx and dx = deltaChaos * (1 - tmpExp) 
 	
 	
+	// y[n] = a*y[n-1]+b*(x[n]+x[n-1])
+			
 	/**
 	 * 
 	 */
@@ -79,7 +81,7 @@ public class SentencesAnimator implements ActionListener {
 			break;
 		}
 		
-		System.out.println(chaosIntensity);
+		//System.out.println(chaosIntensity);
 
 		double a1=0.35;
 		double a2=0.25;
@@ -94,7 +96,7 @@ public class SentencesAnimator implements ActionListener {
 		float alpha = (float)(0.5 + sine(a1, f1) + sine(a2, f2) + sine(a3, f3) + 0.1 * Math.random());
 		alpha = Math.max(alpha, 0);
 		alpha = Math.min(alpha, 1);
-		alpha = 1f; // debug
+		alpha = 0f; // debug
 
 		projector1.setAlpha(alpha * chaosIntensity);
 		projector2.setAlpha((1-alpha) * chaosIntensity);
@@ -114,13 +116,14 @@ public class SentencesAnimator implements ActionListener {
 	 */
 	public void breath(double force) {
 		
-		System.out.println("SentencesAnimator: breath with force "+force);
 		
 		if (force <= 0.0) return; // DO NOTHING if no breath detected 
 		else {
+			System.out.println("SentencesAnimator: breath with force "+force);
 			chaosIntensity += force; // TODO : add attack phase, adjust formulae + implement it through a low-pass digital filter
 			if (chaosIntensity > 1.0) chaosIntensity = 1.0;
 		}
+		// Code missing !
 		
 	}
 	

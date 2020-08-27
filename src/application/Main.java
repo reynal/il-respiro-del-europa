@@ -71,12 +71,11 @@ public class Main {
 		// start the thread for sentence animation
 		SentencesAnimator sa = new SentencesAnimator();
 
+		// create waves with fans
+		WindWave windWave = new WindWave();
+
 		// record sound and check for breathing:
-		Microphone microphone = new Microphone(sa);
-		
-	
-		WindWave w = new WindWave();
-		
+		new Microphone(sa, windWave);
 		
 	}
 

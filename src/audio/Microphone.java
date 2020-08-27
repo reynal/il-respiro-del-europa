@@ -117,7 +117,8 @@ public class Microphone extends Thread {
 	 */
 	@Override
 	public void run() {
-		double breath_pwr[] = {0,0,0,0};
+		
+		double breath_pwr[] = new double[4]; // {0,0,0,0};
 		double breath_energy = 0;
 		int i = 0;
 		
@@ -159,7 +160,6 @@ public class Microphone extends Thread {
 	public static void main(String[] args) throws Exception {
 
 		Microphone m = new Microphone(new SentencesAnimator(), new WindWave());
-		//Microphone m = new Microphone(null);
 	}
 
 }

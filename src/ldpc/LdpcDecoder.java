@@ -129,6 +129,12 @@ public class LdpcDecoder {
 		}
 
 	}
+	
+	public void injectSomeMoreNoise(double intensity) {
+		
+		
+		
+	}
 
 	/** Runs one decoder iteration and return the beliefs - die können benutzt werden, um Noise im BufferImage zu fabrizieren */
 	public double[] nextIteration() {
