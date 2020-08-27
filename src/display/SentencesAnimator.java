@@ -37,6 +37,7 @@ public class SentencesAnimator implements ActionListener {
 	public SentencesAnimator(UserInterface ui) throws IOException {
 		
 		this.ui = ui;
+		ui.setSentencesAnimator(this);
 		this.time = 0.0;
 		sentencesFileReader = new SentencesFileReader();
 		
