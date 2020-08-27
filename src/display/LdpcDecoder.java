@@ -1,12 +1,10 @@
-package ldpc;
+package display;
 
 //package ldpc;
 import java.util.*;
-import java.math.*;
+//import java.math.*;
 import java.io.*;
-import javax.swing.*;
-
-import display.SentencesAnimator;
+//import javax.swing.*;
 
 /**
  * LDPC decoder class Skeleton of class taken from
@@ -20,23 +18,26 @@ import display.SentencesAnimator;
 public class LdpcDecoder {
 
 	public int tmp_bit[]; // tentative decision word
-	// public double posterior[]; // log likelihood ratio
+	public double q0[]; // posterior proba of bit[i]=0
 
 	private double alpha[][];
 	private double beta[][];
+	private double lambda[];
+	private double posterior[];
+
 	private double damping;
+	
+	private double initPER; // initial P_err
 
-	public int n; // code length
-	public int m; // number of parity bits
-	public int rmax; // maximum number of row weight
-	public int cmax; // maximum number of column weight
-	public int row_weight[]; // weight of each column
-	public int col_weight[]; // weight of each row
-	public int row_list[][];
-	public int col_list_r[][];
-	public int col_list_c[][];
-
-	double lambda[];
+	private int n; // code length
+	private int m; // number of parity bits
+	private int rmax; // maximum number of row weight
+	private int cmax; // maximum number of column weight
+	private int row_weight[]; // weight of each column
+	private int col_weight[]; // weight of each row
+	private int row_list[][];
+	private int col_list_r[][];
+	private int col_list_c[][];
 
 	/**
 	 * Initializes decoder with parity check matrix read from a specially formated
@@ -106,6 +107,20 @@ public class LdpcDecoder {
 			}
 		}
 		file.close();
+		
+		// allocate variables here - need to this only once (avoid memory leaks?)
+		alpha = new double[m][rmax];
+		beta = new double[m][rmax];
+		lambda = new double[n];
+		posterior = new double[n];
+		q0 = new double[n];
+
+		tmp_bit = new int[n];
+		
+		initPER = 0.09; // TODO compute this at each re-init
+		
+		initState();
+		
 	}
 
 	/**
@@ -115,32 +130,54 @@ public class LdpcDecoder {
 	public void initState() {
 
 		double bsc_p = 0.09; // TODO : doit dependre du souffle !?
-		this.lambda = generateBSCnoise(64800, bsc_p); // 204; 204.33.486.txt
+		for (int i=0; i<n; i++) lambda[i] = 0;
+		addBSCnoise(lambda, bsc_p); 
 		// lambda: log likelihood ratio
+		calc_q0(lambda);
 
-		alpha = new double[m][rmax];
-		beta = new double[m][rmax];
-		tmp_bit = new int[n];
 		// initialization of beta
 		for (int i = 0; i <= m - 1; i++) {
 			for (int j = 0; j <= row_weight[i] - 1; j++) {
 				beta[i][j] = 0.0;
 			}
-		}
+		}		
 
 	}
-	
+
+	/**
+	 * Generate and add binary symmetric noise
+	 * @param lambda vector
+	 * @param p error proba
+	 */
+	public void addBSCnoise(double[] lambda, double p) {
+		double llr = Math.log((1 - p) / p);
+		for (int i = 0; i < n; i++)
+			lambda[i] += (Math.random() < p ? -llr : llr);	
+	}
+
+	/**
+	 * add BSC noise to current posterior LLRs and use as new channel noise
+	 * re-inits decoder
+	 * @param intensity is BSC-p (keep smaller than 0.09)
+	 */
 	public void injectSomeMoreNoise(double intensity) {
 		
-		
+		addBSCnoise(posterior, intensity);
+		for (int i=0; i<n; i++) lambda[i] = posterior[i];
+		calc_q0 (posterior);
+
+		// initialization of beta
+		for (int i = 0; i <= m - 1; i++) {
+			for (int j = 0; j <= row_weight[i] - 1; j++) {
+				beta[i][j] = 0.0;
+			}
+		}		
 		
 	}
 
 	/** Runs one decoder iteration and return the beliefs - die können benutzt werden, um Noise im BufferImage zu fabrizieren */
 	public double[] nextIteration() {
-
-		double[] posterior = new double[n];
-
+		
 		// row operation
 		for (int i = 0; i <= m - 1; i++) {
 			double sum = 0.0;
@@ -158,7 +195,6 @@ public class LdpcDecoder {
 
 		// column operation
 		double sum = 0.0;
-		double[] q0 = new double[n];
 
 		for (int i = 0; i <= n - 1; i++) {
 			sum = 0.0;
@@ -168,7 +204,7 @@ public class LdpcDecoder {
 				beta[col_list_r[i][j]][col_list_c[i][j]] = sum - alpha[col_list_r[i][j]][col_list_c[i][j]];
 			}
 			posterior[i] = lambda[i] + sum;
-			q0[i] = Math.exp(posterior[i]) / (1 + Math.exp(posterior[i])); // beliefs
+			
 			if (posterior[i] > 0)
 				tmp_bit[i] = 0;
 			else
@@ -176,36 +212,37 @@ public class LdpcDecoder {
 		}
 
 		// SR pending: if (ldpc != null) ldpc.updateImages(q0);
-
+		
+		calc_q0(posterior);
 		return q0;
 
 	}
 
-	//
-	double getPER(double[] q0) {
-		
-		// CLAUDIO !!!
-		return Double.NaN;
+	/**
+	 * get an estimate of how many errors remain
+	 * uses current q0 values
+	 * @return 0.5 * estimated "soft error proba"
+	 */
+	
+	public double getPER() {
+		int n = q0.length;
+        double sum = 0.0;
+        for (int i=0; i<n; i++) sum += q0[i];
+		return Math.min(1.0, 0.5*(1.0-(sum/(double)n))/initPER); // 0.5 * proba erreur		
 	}
 
 	/**
-	 * Generate binary symmetric noise
-	 * 
-	 * @param n: vector length
-	 * @param p: error probability
-	 * @return: noise vector
+	 * computes q0 from llr vector
+	 * @param llr
 	 */
-	private double[] generateBSCnoise(int n, double p) {
-
-		double ret[] = new double[n];
-		double llr = Math.log((1 - p) / p);
-		for (int i = 0; i < n; i++)
-			ret[i] = (Math.random() < p ? -llr : llr);
-		return ret;
+	private void calc_q0(double[] llr) {
+		for (int i=0; i<llr.length; i++)
+			q0[i] = Math.exp(llr[i]) / (1 + Math.exp(llr[i])); // beliefs			
 	}
-
+	
+	
 	// sign function
-	public int sign(double x) {
+	private int sign(double x) {
 		if (x >= 0.0)
 			return 1;
 		else
@@ -213,7 +250,7 @@ public class LdpcDecoder {
 	}
 
 	// Gallager's f function
-	public double gallager_f(double x) {
+	private double gallager_f(double x) {
 		double y;
 		double a = Math.exp(x);
 		if (x < 0.00001)

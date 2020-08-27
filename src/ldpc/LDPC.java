@@ -18,6 +18,8 @@ import java.awt.Toolkit;
 import javax.imageio.*;
 import javax.swing.*;
 
+import display.LdpcDecoder;
+
 /**
  * 
  */

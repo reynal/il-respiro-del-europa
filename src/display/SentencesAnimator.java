@@ -27,7 +27,9 @@ public class SentencesAnimator implements ActionListener {
 	private double time;
 	public static final int TIMER_PERIOD_MS = 10; // ms
 	
-	private Projector projector1, projector2;	
+	private Projector projector1, projector2;
+	
+	private LdpcDecoder ldpcDec;
 	
 	private double chaosIntensity; // set by audio thread depending on breath detection
 	
@@ -43,6 +45,7 @@ public class SentencesAnimator implements ActionListener {
 		
 		projector1 = new Projector(SCREEN_0);
 		projector2 = new Projector(SCREEN_1);
+		ldpcDec = new LdpcDecoder(); 
 		pickNewSentencePair();
 
 		timer = new Timer(TIMER_PERIOD_MS, this);
@@ -75,7 +78,17 @@ public class SentencesAnimator implements ActionListener {
 		alpha = Math.min(alpha, 1);
 		//alpha = 0f; // debug
 
-		projector1.setAlpha(alpha * chaosIntensity);
+		// TODO slow down how often decoder is called (at time % interval?) 
+		double[] q0 = ldpcDec.nextIteration();
+		float per = (float)ldpcDec.getPER();
+        //System.out.println("per = "+per);
+		
+        // TODO as done here, always the first projector "wins", thus always "even" sentences
+        projector1.modImage(q0,(1.0f-per)*alpha); 
+        projector2.modImage(q0,per*(1-alpha));
+
+        // TODO setAlpha does nothing, include this into modImage (as third param?)
+		projector1.setAlpha(alpha * chaosIntensity); 
 		projector2.setAlpha((1-alpha) * chaosIntensity);
 		
 		projector1.repaint();
@@ -108,9 +121,9 @@ public class SentencesAnimator implements ActionListener {
 		
 		//TODO : pick from a file
 		String[] ss = sentencesFileReader.fetchNewPair();
-		projector1.sentence = ss[0];
-		projector2.sentence = ss[1];
-		// TODO : restart decoder !
+		projector1.setSentence(ss[0]);
+		projector2.setSentence(ss[1]);
+		ldpcDec.initState();
 	}
 	
 	// --------------------------------- test ---------------------------------
