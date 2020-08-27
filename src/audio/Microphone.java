@@ -117,12 +117,17 @@ public class Microphone extends Thread {
 		LOGGER.info("Microphone thread started");
 
 		while (isRunning && audioSignal.acquire(line) != -1) {
+			
+			if (DEBUG_SAVE_WAVE) audioSignal.saveToFile(waveDos);
+			if (DEBUG_SAVE_FFT) breathDetector.saveToFile(fftDos);
+
 			//breathDetector.isBreath();
 			out("BreathDetector : " + (breathDetector.isBreath() ? "BREATH!!!" : ""));
 			//out("Breath power =" + audioSignal.level_dB() + " dB");
-			if (DEBUG_SAVE_WAVE) audioSignal.saveToFile(waveDos);
-			if (DEBUG_SAVE_FFT) breathDetector.saveToFile(fftDos);
-			if (breathDetector.isBreath()) sentencesAnimator.breath(1.0); // TODO CLaudio => tenir compte de fenetre glissante
+			if (breathDetector.isBreath()) {
+				sentencesAnimator.breath(1.0); // TODO CLaudio => tenir compte de fenetre glissante
+				
+			}
 		}
 		
 		LOGGER.info("Microphone thread terminated");
