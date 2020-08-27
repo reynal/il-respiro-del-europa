@@ -1,11 +1,11 @@
-package audio;
+package application;
 
 import javax.swing.JFrame;
 
 @SuppressWarnings("serial")
-public class UIMicrophone extends JFrame {
+public class UserInterface extends JFrame {
 
-	public UIMicrophone() {
+	public UserInterface() {
 		
 		super();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

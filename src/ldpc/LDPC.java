@@ -50,7 +50,7 @@ public class LDPC {
         
         // SR int max_iter = 40;
         
-        LdpcDecoder decoder = new LdpcDecoder(this);
+        LdpcDecoder decoder = new LdpcDecoder();
 
         // SR => claudio : tout ce code correspond a peu pres a SentencesAnimator et Projector...
         
@@ -169,7 +169,7 @@ public class LDPC {
         double sum = 0.0;
         for (int i=0; i<n; i++) sum += q0[i];
         double bsc_p = 0.09; // TODO : doit dependre du souffle !?
-        float per = (float)Math.min(1.0, 0.5*(1.0-(sum/(double)n))/bsc_p);
+        float per = (float)Math.min(1.0, 0.5*(1.0-(sum/(double)n))/bsc_p); // proba erreur
         System.out.println("per = "+per);
         p1.modImage(q0,1.0f-per); // was q0=Pr(x_i=0)
         p2.modImage(q0,per);
@@ -256,6 +256,7 @@ class GraphicsPanel extends JPanel {
     }
 }
 
+// ne sert plus
 class MergePanel extends JPanel {
 
     private BufferedImage image;

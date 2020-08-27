@@ -8,6 +8,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
 import application.Preferences;
+import display.SentencesAnimator;
 
 import static audio.AudioConstants.*;
 import static application.Main.out;
@@ -28,6 +29,7 @@ public class Microphone extends Thread {
 	private DataOutputStream waveDos, fftDos;
 	private BreathDetector breathDetector; 
 	private boolean isRunning; // makes it possible to "terminate" thread
+	private SentencesAnimator sentencesAnimator;
 	
 	public static final boolean DEBUG_SAVE_WAVE = false;
 	public static final boolean DEBUG_SAVE_FFT = false;
@@ -37,8 +39,9 @@ public class Microphone extends Thread {
 	 * Creates a Microphone that can record audio from a mic and feed an AudioSignal.
 	 * @throws FileNotFoundException if I/O error with WAVE_FILE_DBG (debug only)
 	 */
-	public Microphone() throws FileNotFoundException {
+	public Microphone(SentencesAnimator sentencesAnimator) throws FileNotFoundException {
 
+		this.sentencesAnimator = sentencesAnimator;
 		audioSignal = new AudioSignal();
 		breathDetector = new BreathDetector(audioSignal);
 		
@@ -119,6 +122,7 @@ public class Microphone extends Thread {
 			//out("Breath power =" + audioSignal.level_dB() + " dB");
 			if (DEBUG_SAVE_WAVE) audioSignal.saveToFile(waveDos);
 			if (DEBUG_SAVE_FFT) breathDetector.saveToFile(fftDos);
+			if (breathDetector.isBreath()) sentencesAnimator.breath(1.0); // TODO CLaudio => tenir compte de fenetre glissante
 		}
 		
 		LOGGER.info("Microphone thread terminated");
@@ -128,7 +132,7 @@ public class Microphone extends Thread {
 	
 	public static void main(String[] args) throws Exception {
 
-		Microphone m = new Microphone();
+		Microphone m = new Microphone(new SentencesAnimator());
 
 	}
 

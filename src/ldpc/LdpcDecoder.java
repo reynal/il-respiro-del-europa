@@ -176,6 +176,11 @@ public class LdpcDecoder {
 	}
 
 	//
+	double getPER(double[] q0) {
+		
+		// CLAUDIO !!!
+		return Double.NaN;
+	}
 
 	/**
 	 * Generate binary symmetric noise

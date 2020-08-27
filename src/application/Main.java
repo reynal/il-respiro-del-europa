@@ -68,11 +68,12 @@ public class Main {
 		//System.out.println("ciao mundo");
 		//testLogger();
 		
-		// record sound and check for breathing:
-		Microphone microphone = new Microphone();
-		
 		// start the thread for sentence animation
 		SentencesAnimator sa = new SentencesAnimator();
+
+		// record sound and check for breathing:
+		Microphone microphone = new Microphone(sa);
+		
 	
 		WindWave w = new WindWave();
 		

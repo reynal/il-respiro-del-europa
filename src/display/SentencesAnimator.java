@@ -18,16 +18,27 @@ import javax.swing.Timer;
 public class SentencesAnimator implements ActionListener {
 	
 	public static final int TIMER_PERIOD_MS = 10; // ms
+	public static final double DECAY_S = 10.; // s
 	
 	private Timer timer;
 	private double time;
 	
 	private Projector projector1, projector2;	
 	
+	private double chaosIntensity; // increases suddenly on breathing detection, otherwise decreases naturally over time
 	
+	private double decayFactor; // chaosIntensity gets multiplied by this factor over time 
+	
+	
+	/**
+	 * 
+	 */
 	public SentencesAnimator() {
 
 		this.time = 0.0;
+		this.chaosIntensity = 1.0;
+		this.decayFactor = Math.exp(-TIMER_PERIOD_MS / (DECAY_S * 1000.)); // TODO : load DECAY_S from property file
+		System.out.println(decayFactor);
 		
 		projector1 = new Projector(SCREEN_0);
 		projector2 = new Projector(SCREEN_1);
@@ -43,9 +54,10 @@ public class SentencesAnimator implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		time++;		
+		time++;	
+		chaosIntensity *= decayFactor;
+		System.out.println(chaosIntensity);
 
-		Projector p = projector1;
 		double a1=0.35;
 		double a2=0.25;
 		double a3=0.15;
@@ -60,13 +72,32 @@ public class SentencesAnimator implements ActionListener {
 		// TODO : make it go to zero slowly (20'/30')
 		alpha = Math.max(alpha, 0);
 		alpha = Math.min(alpha, 1);
-		p.setAlpha(alpha);
+
+		projector1.setAlpha(alpha * chaosIntensity);
+		projector2.setAlpha((1-alpha) * chaosIntensity);
 		
-		projector2.setAlpha(1-alpha);
+		projector1.repaint();
+		projector2.repaint();
+		
 	}
 	
-	public double sine(double amp, double freq) {
+	private double sine(double amp, double freq) {
 		return amp * Math.sin(2.0 * Math.PI * freq * time);
+	}
+	
+	/**
+	 * Call this from the audio thread every time a breathing detection occurs.
+	 * @param force b/w 0 and 1
+	 */
+	public void breath(double force) {
+		
+		
+	}
+	
+	private void pickNewSentencePair() {
+		
+		projector1.sentence = "Screen 0";
+		projector2.sentence = "Screen 1";
 	}
 	
 	// --------------------------------- test ---------------------------------

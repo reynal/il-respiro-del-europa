@@ -13,8 +13,11 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class Projector extends JWindow {
 
+	private final static boolean DEBUG = true;
+
 	private AnimationConstants screen;
-	private float alpha;
+	private float alpha; // alpha composite
+	String sentence="";
 
 	/**
 	 * 
@@ -30,7 +33,8 @@ public class Projector extends JWindow {
 				
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		add(new GraphicPanel());
-		setSize(dim);
+		if (DEBUG) setSize(1000,300);
+		else setSize(dim);
 		// setLocation(0, 0); // attention : ramene la frame sur l'écran de gauche !
 		setVisible(true);
 	}
@@ -43,21 +47,11 @@ public class Projector extends JWindow {
 	 * Change the alpha composite parameter for this video projector
 	 * @param alpha
 	 */
-	public void setAlpha(float alpha) {
-		this.alpha = alpha;
+	public void setAlpha(double alpha) {
+		this.alpha = (float)alpha;
 		repaint();
 	}
 	
-	private String fetchSentence() {
-		
-		switch (screen) {
-		case SCREEN_0:
-			return "Vorrei dirvi: Sono nato in carso, in una casupola col tetto di paglia";
-		case SCREEN_1:
-			return "Vorrei dirvi: Sono nato in Croazia, nella grande foresta di roveri";
-		}
-		return null;
-	}
 	
 	// ------------------------------------------------------------------------------------
 	
@@ -79,9 +73,8 @@ public class Projector extends JWindow {
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));			
             Font font = new Font("Serif", Font.PLAIN, 50); // TODO : improve font! (TTF)
             g.setFont(font);
-            String s = fetchSentence();
-            int textWidth = g.getFontMetrics().stringWidth(s);
-			g.drawString(s, 0.5f*(getWidth()-textWidth), 0.5f*getHeight());
+            int textWidth = g.getFontMetrics().stringWidth(sentence);
+			g.drawString(sentence, 0.5f*(getWidth()-textWidth), 0.5f*getHeight());
 
 			//g.fill(new Ellipse2D.Double(100, 100, 200, 200));
 
