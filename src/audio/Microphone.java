@@ -8,6 +8,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
 import application.Preferences;
+import application.UserInterface;
 import display.SentencesAnimator;
 import fan.WindWave;
 
@@ -24,6 +25,12 @@ import static application.Main.out;
  */
 public class Microphone extends Thread {
 
+	private SentencesAnimator sentencesAnimator;
+	private WindWave windWave;
+	private UserInterface ui;
+	private ChaosDynamics chaosDynamics; 
+	
+	
 	private static final Logger LOGGER = Logger.getLogger("confLogger");
 	private TargetDataLine line;
 	private AudioSignal audioSignal;
@@ -31,8 +38,6 @@ public class Microphone extends Thread {
 	private BreathDetector breathDetector; 
 	private boolean isRunning; // makes it possible to "terminate" thread
 	
-	private SentencesAnimator sentencesAnimator;
-	private WindWave windWave;
 	
 	public static final boolean DEBUG_SAVE_WAVE = false;
 	public static final boolean DEBUG_SAVE_FFT = false;
@@ -42,10 +47,12 @@ public class Microphone extends Thread {
 	 * Creates a Microphone that can record audio from a mic and feed an AudioSignal.
 	 * @throws FileNotFoundException if I/O error with WAVE_FILE_DBG (debug only)
 	 */
-	public Microphone(SentencesAnimator sentencesAnimator, WindWave windWave) throws FileNotFoundException {
+	public Microphone(SentencesAnimator sentencesAnimator, WindWave windWave, UserInterface userInterface) throws FileNotFoundException {
 
 		this.sentencesAnimator = sentencesAnimator;
 		this.windWave = windWave;
+		this.ui = userInterface;
+		chaosDynamics = new ChaosDynamics(ui);
 		
 		audioSignal = new AudioSignal();
 		breathDetector = new BreathDetector(audioSignal);
@@ -69,9 +76,10 @@ public class Microphone extends Thread {
 		LOGGER.info("Opening mixer " + str);
 		try {
 			line = AudioHub.obtainInputLine(str);
-			line.addLineListener(e -> System.out.println(e));
+			line.addLineListener(e-> System.out.println(e));
 			line.open();
 			line.start();
+			ui.setMicrophoneStatut(str);
 		} catch (LineUnavailableException e) { e.printStackTrace(); }
 	}
 
@@ -127,9 +135,12 @@ public class Microphone extends Thread {
 
 		while (isRunning && audioSignal.acquire(line) != -1) {
 
+			double level = audioSignal.level_dB();
+			//System.out.println(level);
+			ui.setMicrophoneLevel(level);
 			//breath_energy -= breath_pwr[i];
 			if (breathDetector.isBreath()) {				
-				breath_pwr[i] = 1-audioSignal.level_dB()/SILENCE_THRESHOLD_DB;
+				breath_pwr[i] = 1-level/SILENCE_THRESHOLD_DB;
 				//breath_energy += breath_pwr[i];				
 			}
 			else {
@@ -140,8 +151,11 @@ public class Microphone extends Thread {
 			for (int j=0; j<breath_pwr.length; j++) breath_energy += breath_pwr[i];
 			
 			double breathForce = breath_energy/breath_pwr.length;
-			sentencesAnimator.breath(breathForce);
-			windWave.breath(breathForce); 
+			//System.out.println(breathForce);
+			ui.setBreathForce(breathForce);
+			chaosDynamics.updateDynamics(breathForce);
+			sentencesAnimator.setChaosIntensity(chaosDynamics.getChaosIntensity());
+			windWave.setChaosIntensity(chaosDynamics.getChaosIntensity());
 			
 			//out("BreathDetector : " + (breathDetector.isBreath() ? "BREATH!!!" : ""));
 			//out("Breath energy =" + breath_energy);
@@ -154,12 +168,13 @@ public class Microphone extends Thread {
 		
 		LOGGER.info("Microphone thread terminated");
 	}
+	
 
 	// --------------------------------- test ---------------------------------
 	
 	public static void main(String[] args) throws Exception {
 
-		Microphone m = new Microphone(new SentencesAnimator(), new WindWave());
+		Microphone m = new Microphone(new SentencesAnimator(null), new WindWave(), new UserInterface());
 	}
 
 }

@@ -5,8 +5,11 @@ import static display.AnimationConstants.SCREEN_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.Timer;
+
+import application.UserInterface;
 
 /**
  * Class responsible for the visual animation of the sentence display
@@ -17,45 +20,25 @@ import javax.swing.Timer;
  */
 public class SentencesAnimator implements ActionListener {
 	
-	public static final int TIMER_PERIOD_MS = 10; // ms
-	public static final double ATTACK_S = 1.; // s
-	public static final double DECAY_S = 2.; // s
-	
-	// the dynamics of the animation is governed by two phases:
-	// DECAY : no breathing, chaosIntensity just decays to zero
-	// ATTACK : after a breathing occurred, chaosIntensity increases to a target value depending on the force of the breathing, then decays if nothing happens
-	private enum StateMachine {
-		ATTACK, 
-		DECAY
-	}
-	
-	private StateMachine stateMachine = StateMachine.DECAY;
+	private UserInterface ui;
+	private SentencesFileReader sentencesFileReader;
 	
 	private Timer timer;
 	private double time;
+	public static final int TIMER_PERIOD_MS = 10; // ms
 	
 	private Projector projector1, projector2;	
 	
-	private double chaosIntensity; // increases suddenly on breathing detection, otherwise decreases naturally over time
+	private double chaosIntensity; // set by audio thread depending on breath detection
 	
-	private double decayFactor; // in DECAY phase, chaosIntensity gets multiplied by this factor over time
-	//private double attackFactor; // ibid, for ATTACK phase
-	private double tmpExp; // tmp variable that is init'd to 1.0, and then plays the role of exp(-t/tau) : 
-							// in both phases, tmpExp *= attackFactor or decayFactor, 
-							// and then  chaosIntensity += dx and dx = deltaChaos * (1 - tmpExp) 
-	
-	
-	// y[n] = a*y[n-1]+b*(x[n]+x[n-1])
-			
 	/**
-	 * 
+	 * @throws IOException if sentence file can't be loaded 
 	 */
-	public SentencesAnimator() {
-
+	public SentencesAnimator(UserInterface ui) throws IOException {
+		
+		this.ui = ui;
 		this.time = 0.0;
-		this.chaosIntensity = 1.0;
-		this.decayFactor = Math.exp(-TIMER_PERIOD_MS / (DECAY_S * 1000.)); // TODO : load DECAY_S from property file
-		//this.attackFactor = Math.exp(-TIMER_PERIOD_MS / (ATTACK_S * 1000.)); // TODO : load from property file
+		sentencesFileReader = new SentencesFileReader();
 		
 		projector1 = new Projector(SCREEN_0);
 		projector2 = new Projector(SCREEN_1);
@@ -73,13 +56,6 @@ public class SentencesAnimator implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		time++;	
-		switch (stateMachine) {
-		case ATTACK:
-			break;
-		case DECAY:
-			chaosIntensity *= decayFactor;
-			break;
-		}
 		
 		//System.out.println(chaosIntensity);
 
@@ -114,24 +90,25 @@ public class SentencesAnimator implements ActionListener {
 	 * Called from the audio thread every time a breathing detection occurs.
 	 * @param force b/w 0 and 1
 	 */
-	public void breath(double force) {
+	public void setChaosIntensity(double intensity) {
 		
-		
-		if (force <= 0.0) return; // DO NOTHING if no breath detected 
-		else {
-			System.out.println("SentencesAnimator: breath with force "+force);
-			chaosIntensity += force; // TODO : add attack phase, adjust formulae + implement it through a low-pass digital filter
-			if (chaosIntensity > 1.0) chaosIntensity = 1.0;
+		// if sudden increase:
+		if (intensity > chaosIntensity) {
+			
 		}
-		// Code missing !
+		
+		chaosIntensity = intensity;
+		
+		// TODO : do something !
 		
 	}
 	
 	private void pickNewSentencePair() {
 		
 		//TODO : pick from a file
-		projector1.sentence = "Screen 0";
-		projector2.sentence = "Screen 1";
+		String[] ss = sentencesFileReader.fetchNewPair();
+		projector1.sentence = ss[0];
+		projector2.sentence = ss[1];
 		// TODO : restart decoder !
 	}
 	
@@ -139,11 +116,11 @@ public class SentencesAnimator implements ActionListener {
 
 	public static void main(String[] args) throws Exception {
 
-		SentencesAnimator sa = new SentencesAnimator();
+		SentencesAnimator sa = new SentencesAnimator(null);
 		
 		Thread t = new Thread(() -> {
 			while(true) {
-			sa.breath(Math.random()); 
+			sa.setChaosIntensity(Math.random()); 
 			try {
 				Thread.sleep((long) (10000 * Math.random()));
 			} catch (InterruptedException e) {

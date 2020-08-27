@@ -27,7 +27,8 @@ public class WindWave {
 		IDLE,
 		CHAOS
 	}
-	// TODO : intensity ! 0-100%
+
+	private double chaosIntensity; // set by audio thread depending on breath detection
 
 	/**
 	 * Start a WindWave in default state "IDLE"
@@ -79,12 +80,16 @@ public class WindWave {
 		}
 	}
 	
-	public void breath(double force) {
+	/**
+	 * Called from the audio thread every time a breathing detection occurs.
+	 * @param force b/w 0 and 1
+	 */
+	public void setChaosIntensity(double intensity) {
 		
-		if (force <= 0.0) return; // DO NOTHING if no breath detected 
-		else {
-			System.out.println("WindWave: breath with force "+force);
-		}
+		chaosIntensity = intensity;
+		
+		// TODO : do something !
+		
 	}
 	
 	

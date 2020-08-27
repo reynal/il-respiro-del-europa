@@ -82,17 +82,26 @@ public class Main {
 	// ---------------------------------------------------------------------------
 	
 	public static void main(String[] args) throws Exception {
-		//System.out.println("ciao mundo");
 		//testLogger();
-		
+				
+		// open UI:
+		UserInterface ui = new UserInterface();
+
 		// start the thread for sentence animation
-		SentencesAnimator sa = new SentencesAnimator();
+		SentencesAnimator sentencesAnimator = new SentencesAnimator(ui);
 
 		// create waves with fans
 		WindWave windWave = new WindWave();
 
 		// record sound and check for breathing:
-		new Microphone(sa, windWave);
+		Microphone microphone = new Microphone(sentencesAnimator, windWave, ui);
+		
+		// bind everything together:
+		ui.setWindWave(windWave);
+		ui.setSentencesAnimator(sentencesAnimator);
+		ui.setMicrophone(microphone);
+		ui.setVisible(true);
+		
 		
 	}
 
