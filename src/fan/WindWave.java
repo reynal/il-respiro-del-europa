@@ -79,6 +79,12 @@ public class WindWave {
 		}
 	}
 	
+	public void breath(double force) {
+		
+		System.out.println("WindWave: breath with force "+force);
+	}
+	
+	
 	// ------------------------- test -------------------------------------
 	
 	public static void main(String[] args) throws InterruptedException {

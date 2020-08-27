@@ -9,6 +9,7 @@ import javax.sound.sampled.TargetDataLine;
 
 import application.Preferences;
 import display.SentencesAnimator;
+import fan.WindWave;
 
 import static audio.AudioConstants.*;
 import static application.Main.out;
@@ -29,7 +30,9 @@ public class Microphone extends Thread {
 	private DataOutputStream waveDos, fftDos;
 	private BreathDetector breathDetector; 
 	private boolean isRunning; // makes it possible to "terminate" thread
+	
 	private SentencesAnimator sentencesAnimator;
+	private WindWave windWave;
 	
 	public static final boolean DEBUG_SAVE_WAVE = false;
 	public static final boolean DEBUG_SAVE_FFT = false;
@@ -39,9 +42,11 @@ public class Microphone extends Thread {
 	 * Creates a Microphone that can record audio from a mic and feed an AudioSignal.
 	 * @throws FileNotFoundException if I/O error with WAVE_FILE_DBG (debug only)
 	 */
-	public Microphone(SentencesAnimator sentencesAnimator) throws FileNotFoundException {
+	public Microphone(SentencesAnimator sentencesAnimator, WindWave windWave) throws FileNotFoundException {
 
 		this.sentencesAnimator = sentencesAnimator;
+		this.windWave = windWave;
+		
 		audioSignal = new AudioSignal();
 		breathDetector = new BreathDetector(audioSignal);
 		
@@ -132,13 +137,18 @@ public class Microphone extends Thread {
 			i = (i+1) % breath_pwr.length;
 			breath_energy = 0;
 			for (int j=0; j<breath_pwr.length; j++) breath_energy += breath_pwr[i];
-			sentencesAnimator.breath(breath_energy/breath_pwr.length);
+			
+			double breathForce = breath_energy/breath_pwr.length;
+			sentencesAnimator.breath(breathForce);
+			windWave.breath(breathForce); 
 			
 			//out("BreathDetector : " + (breathDetector.isBreath() ? "BREATH!!!" : ""));
 			//out("Breath energy =" + breath_energy);
+			//if (breathDetector.isBreath()) sentencesAnimator.breath(1.0); // TODO CLaudio => tenir compte de fenetre glissante
+
 			if (DEBUG_SAVE_WAVE) audioSignal.saveToFile(waveDos);
 			if (DEBUG_SAVE_FFT) breathDetector.saveToFile(fftDos);
-			//if (breathDetector.isBreath()) sentencesAnimator.breath(1.0); // TODO CLaudio => tenir compte de fenetre glissante
+
 		}
 		
 		LOGGER.info("Microphone thread terminated");
@@ -148,7 +158,7 @@ public class Microphone extends Thread {
 	
 	public static void main(String[] args) throws Exception {
 
-		Microphone m = new Microphone(new SentencesAnimator());
+		Microphone m = new Microphone(new SentencesAnimator(), new WindWave());
 		//Microphone m = new Microphone(null);
 	}
 

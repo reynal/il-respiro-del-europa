@@ -114,7 +114,7 @@ public class SentencesAnimator implements ActionListener {
 	 */
 	public void breath(double force) {
 		
-		System.out.println("breath with force "+force);
+		System.out.println("SentencesAnimator: breath with force "+force);
 		
 		if (force <= 0.0) return; // DO NOTHING if no breath detected 
 		else {
