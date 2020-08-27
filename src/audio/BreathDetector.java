@@ -4,6 +4,7 @@ import static application.Main.out;
 import static audio.AudioConstants.BUF_LEN_SAMPLES;
 import static audio.AudioConstants.SAMPLE_FREQ;
 import static audio.AudioConstants.FFT_SIZE;
+import static audio.AudioConstants.SILENCE_THRESHOLD_DB;
 //import static audio.AudioConstants.I200HZ;
 //import static audio.AudioConstants.I500HZ;
 //import static audio.AudioConstants.I1000HZ;
@@ -35,8 +36,8 @@ public class BreathDetector {
 	
 	// FREQ_MIN currently ignored
 	public static final double FREQ_MIN = 100; // filter out frequencies below this value (in Hz) 
-	public static final double SILENCE_THRESHOLD_DB = -75; // -55 anything below is considered silence
-	public static final double HARMONIC_RATIO_THRESHOLD = 15.0; // 
+	
+	public static final double HARMONIC_RATIO_THRESHOLD = 15.0; // no longer used
 
 	public static final int I200HZ = 200*FFT_SIZE/SAMPLE_FREQ;
 	public static final int I500HZ = 500*FFT_SIZE/SAMPLE_FREQ;

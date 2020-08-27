@@ -112,17 +112,32 @@ public class Microphone extends Thread {
 	 */
 	@Override
 	public void run() {
+		double breath_pwr[] = {0,0,0,0};
+		double breath_energy = 0;
+		int i = 0;
 		
 		isRunning = true;
 		LOGGER.info("Microphone thread started");
 
 		while (isRunning && audioSignal.acquire(line) != -1) {
-			//breathDetector.isBreath();
-			out("BreathDetector : " + (breathDetector.isBreath() ? "BREATH!!!" : ""));
-			//out("Breath power =" + audioSignal.level_dB() + " dB");
+			//breath_energy -= breath_pwr[i];
+			if (breathDetector.isBreath()) {				
+				breath_pwr[i] = 1-audioSignal.level_dB()/SILENCE_THRESHOLD_DB;
+				//breath_energy += breath_pwr[i];				
+			}
+			else {
+				breath_pwr[i] = 0;
+			}
+			i = (i+1) % breath_pwr.length;
+			breath_energy = 0;
+			for (int j=0; j<breath_pwr.length; j++) breath_energy += breath_pwr[i];
+			sentencesAnimator.breath(breath_energy/breath_pwr.length);
+			
+			//out("BreathDetector : " + (breathDetector.isBreath() ? "BREATH!!!" : ""));
+			//out("Breath energy =" + breath_energy);
 			if (DEBUG_SAVE_WAVE) audioSignal.saveToFile(waveDos);
 			if (DEBUG_SAVE_FFT) breathDetector.saveToFile(fftDos);
-			if (breathDetector.isBreath()) sentencesAnimator.breath(1.0); // TODO CLaudio => tenir compte de fenetre glissante
+			//if (breathDetector.isBreath()) sentencesAnimator.breath(1.0); // TODO CLaudio => tenir compte de fenetre glissante
 		}
 		
 		LOGGER.info("Microphone thread terminated");
@@ -133,7 +148,7 @@ public class Microphone extends Thread {
 	public static void main(String[] args) throws Exception {
 
 		Microphone m = new Microphone(new SentencesAnimator());
-
+		//Microphone m = new Microphone(null);
 	}
 
 }

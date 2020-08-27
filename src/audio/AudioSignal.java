@@ -52,13 +52,13 @@ public class AudioSignal {
 	 * @return the signal level in dB (aka RMS) computed on the whole buffer length
 	 */
 	public double level_dB() {
-		double sum = 0;
+		double sum = 0.0001;
 		for (int i = 0; i < BUF_LEN_SAMPLES; i++) {
 			double x = getSample(i);
 			sum += x * x;
 		}
 		sum /= BUF_LEN_SAMPLES;
-		return 10 * Math.log(sum);
+		return 10 * Math.log10(sum);
 	}
 
 	// --------------------------------- I/O ---------------------------------
