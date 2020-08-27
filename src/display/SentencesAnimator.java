@@ -18,7 +18,18 @@ import javax.swing.Timer;
 public class SentencesAnimator implements ActionListener {
 	
 	public static final int TIMER_PERIOD_MS = 10; // ms
-	public static final double DECAY_S = 10.; // s
+	public static final double ATTACK_S = 1.; // s
+	public static final double DECAY_S = 2.; // s
+	
+	// the dynamics of the animation is governed by two phases:
+	// DECAY : no breathing, chaosIntensity just decays to zero
+	// ATTACK : after a breathing occurred, chaosIntensity increases to a target value depending on the force of the breathing, then decays if nothing happens
+	private enum StateMachine {
+		ATTACK, 
+		DECAY
+	}
+	
+	private StateMachine stateMachine = StateMachine.DECAY;
 	
 	private Timer timer;
 	private double time;
@@ -27,7 +38,11 @@ public class SentencesAnimator implements ActionListener {
 	
 	private double chaosIntensity; // increases suddenly on breathing detection, otherwise decreases naturally over time
 	
-	private double decayFactor; // chaosIntensity gets multiplied by this factor over time 
+	private double decayFactor; // in DECAY phase, chaosIntensity gets multiplied by this factor over time
+	//private double attackFactor; // ibid, for ATTACK phase
+	private double tmpExp; // tmp variable that is init'd to 1.0, and then plays the role of exp(-t/tau) : 
+							// in both phases, tmpExp *= attackFactor or decayFactor, 
+							// and then  chaosIntensity += dx and dx = deltaChaos * (1 - tmpExp) 
 	
 	
 	/**
@@ -38,10 +53,11 @@ public class SentencesAnimator implements ActionListener {
 		this.time = 0.0;
 		this.chaosIntensity = 1.0;
 		this.decayFactor = Math.exp(-TIMER_PERIOD_MS / (DECAY_S * 1000.)); // TODO : load DECAY_S from property file
-		System.out.println(decayFactor);
+		//this.attackFactor = Math.exp(-TIMER_PERIOD_MS / (ATTACK_S * 1000.)); // TODO : load from property file
 		
 		projector1 = new Projector(SCREEN_0);
 		projector2 = new Projector(SCREEN_1);
+		pickNewSentencePair();
 
 		timer = new Timer(TIMER_PERIOD_MS, this);
 		
@@ -55,7 +71,14 @@ public class SentencesAnimator implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		time++;	
-		chaosIntensity *= decayFactor;
+		switch (stateMachine) {
+		case ATTACK:
+			break;
+		case DECAY:
+			chaosIntensity *= decayFactor;
+			break;
+		}
+		
 		System.out.println(chaosIntensity);
 
 		double a1=0.35;
@@ -69,9 +92,9 @@ public class SentencesAnimator implements ActionListener {
 		double f3 = 0.001 * TIMER_PERIOD_MS / T3;
 		
 		float alpha = (float)(0.5 + sine(a1, f1) + sine(a2, f2) + sine(a3, f3) + 0.1 * Math.random());
-		// TODO : make it go to zero slowly (20'/30')
 		alpha = Math.max(alpha, 0);
 		alpha = Math.min(alpha, 1);
+		alpha = 1f; // debug
 
 		projector1.setAlpha(alpha * chaosIntensity);
 		projector2.setAlpha((1-alpha) * chaosIntensity);
@@ -86,25 +109,46 @@ public class SentencesAnimator implements ActionListener {
 	}
 	
 	/**
-	 * Call this from the audio thread every time a breathing detection occurs.
+	 * Called from the audio thread every time a breathing detection occurs.
 	 * @param force b/w 0 and 1
 	 */
 	public void breath(double force) {
 		
+		System.out.println("breath with force "+force);
+		
+		if (force <= 0.0) return; // DO NOTHING if no breath detected 
+		else {
+			chaosIntensity += force; // TODO : add attack phase, adjust formulae + implement it through a low-pass digital filter
+			if (chaosIntensity > 1.0) chaosIntensity = 1.0;
+		}
 		
 	}
 	
 	private void pickNewSentencePair() {
 		
+		//TODO : pick from a file
 		projector1.sentence = "Screen 0";
 		projector2.sentence = "Screen 1";
+		// TODO : restart decoder !
 	}
 	
 	// --------------------------------- test ---------------------------------
 
 	public static void main(String[] args) throws Exception {
 
-		new SentencesAnimator();
+		SentencesAnimator sa = new SentencesAnimator();
+		
+		Thread t = new Thread(() -> {
+			while(true) {
+			sa.breath(Math.random()); 
+			try {
+				Thread.sleep((long) (10000 * Math.random()));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			}});	
+		t.start();
 	}
 
 }

@@ -9,6 +9,8 @@ public class AudioConstants {
 	public static final boolean IS_BIG_ENDIAN = true;
 	public static final boolean IS_SIGNED = true;
 	
+	public static final double SILENCE_THRESHOLD_DB = -40; // anything below is considered silence
+	
 	public static final int BUF_LEN_SAMPLES = 1*2048; // 1/8 seconde @ 16kHz
 	public static final int BUF_LEN = SAMPLE_SIZE_BYTE * BUF_LEN_SAMPLES; // BYTES
 	
