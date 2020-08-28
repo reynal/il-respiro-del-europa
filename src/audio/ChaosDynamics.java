@@ -1,5 +1,7 @@
 package audio;
 
+import java.util.logging.Logger;
+
 import application.UserInterface;
 
 /**
@@ -10,9 +12,13 @@ import application.UserInterface;
  *
  */
 public class ChaosDynamics {
+	
+	private static final Logger LOGGER = Logger.getLogger("confLogger");
 
 	//public static final double ATTACK_S = 1.; // s
 	public static final double DECAY_S = 2.; // s
+	public final static double TIMER_PERIOD_S = (double)AudioConstants.BUF_LEN / AudioConstants.SAMPLE_FREQ;
+
 
 	// the dynamics of the animation is governed by two phases:
 	// DECAY : no breathing, chaosIntensity just decays to zero
@@ -42,9 +48,9 @@ public class ChaosDynamics {
 	 */
 	public ChaosDynamics(UserInterface ui) {
 		this.ui = ui;
+		ui.setChaosDynamics(this);
 		this.chaosIntensity = 0.0;
-		final double timerPeriod = (double)AudioConstants.BUF_LEN / AudioConstants.SAMPLE_FREQ;
-		this.decayFactor = Math.exp(-timerPeriod / DECAY_S); // TODO : load DECAY_S from property file
+		this.decayFactor = Math.exp(-TIMER_PERIOD_S / DECAY_S); // TODO : load DECAY_S from property file
 		System.out.println("decayFactor="+decayFactor);
 		// this.attackFactor = Math.exp(-TIMER_PERIOD_MS / (ATTACK_S * 1000.)); // TODO
 		// : load from property file
@@ -56,6 +62,10 @@ public class ChaosDynamics {
 		return chaosIntensity;
 	}
 
+	public void setDecayTime(double tau) {
+		LOGGER.info("Setting decay time to " + tau);
+		this.decayFactor = Math.exp(-TIMER_PERIOD_S / tau); 
+	}
 
 
 	/**

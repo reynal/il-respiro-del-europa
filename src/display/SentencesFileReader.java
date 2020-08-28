@@ -15,12 +15,13 @@ public class SentencesFileReader {
 		while ((line = reader.readLine()) != null) {
 			if (!line.isBlank()) list.add(line);
 		}
+		reader.close();
 	}
 	
 	public String toString() {
 		
 		String s = "";
-		Iterator it = list.iterator();
+		Iterator<String> it = list.iterator();
 		while (it.hasNext()) s += it.next() + "\n";
 		return s;
 		
@@ -29,10 +30,15 @@ public class SentencesFileReader {
 	public String[] fetchNewPair() {
 		Random random = new Random();
 		int n = random.nextInt(list.size());
-		if (n%2 == 1) n--;
 		String[] ss = new String[2];
-		ss[0] = list.get(n);
-		ss[1] = list.get(n+1);
+		if (n%2 == 1) {
+			ss[0] = list.get(n-1); // 0
+			ss[1] = list.get(n); // 1
+		}
+		else {
+			ss[0] = list.get(n+1); // 1
+			ss[1] = list.get(n); // 0
+		}
 		return ss;
 	}
 	

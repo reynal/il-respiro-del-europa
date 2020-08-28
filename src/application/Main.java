@@ -91,15 +91,11 @@ public class Main {
 		SentencesAnimator sentencesAnimator = new SentencesAnimator(ui);
 
 		// create waves with fans
-		WindWave windWave = new WindWave();
+		WindWave windWave = new WindWave(ui);
 
 		// record sound and check for breathing:
 		Microphone microphone = new Microphone(sentencesAnimator, windWave, ui);
-		
-		// bind everything together:
-		ui.setWindWave(windWave);
-		ui.setSentencesAnimator(sentencesAnimator);
-		ui.setMicrophone(microphone);
+				
 		ui.setVisible(true);
 		
 		

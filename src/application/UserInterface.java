@@ -6,6 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import audio.ChaosDynamics;
 import audio.Microphone;
 import display.SentencesAnimator;
 import fan.WindWave;
@@ -16,6 +17,7 @@ public class UserInterface extends JFrame {
 	private SentencesAnimator sentencesAnimator; 
 	private WindWave windWave;
 	private Microphone microphone;
+	private ChaosDynamics chaosDynamics;
 	
 	private JLabel microphoneLevelLBL, microphoneStatutLBL, breathForceLBL, chaosIntensityLBL;
 	
@@ -27,13 +29,14 @@ public class UserInterface extends JFrame {
 		super();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLayout(new GridLayout(4,2));
+		this.setLayout(new GridLayout(5,2));
 		
 		microphoneStatutLBL = addJLabel("Record from: ");
 		microphoneLevelLBL = addJLabel("Input level (dB): ");
 		breathForceLBL = addJLabel("Breath force: ");
 		chaosIntensityLBL = addJLabel("Chaos intensity: ");
-		//addJSpinner("x", null);
+		addJSpinner("Decay time (ms)", e -> chaosDynamics.setDecayTime((Integer)((JSpinner)e.getSource()).getValue()));
+		//addJSpinner("Decay time (ms)", e -> System.out.println(((JSpinner)e.getSource()).getValue().getClass()));
 		
 		//addJToggleButton("windwave", e -> System.out.println(((JToggleButton)e.getSource()).isSelected()));
 		//addJButton("new sentence", "load", e -> System.out.println("push"));
@@ -44,6 +47,10 @@ public class UserInterface extends JFrame {
 		
 	}
 	
+	public void setChaosDynamics(ChaosDynamics chaosDynamics) {
+		this.chaosDynamics = chaosDynamics;
+	}
+
 	public void setWindWave(WindWave windWave) {
 		this.windWave = windWave;
 	}

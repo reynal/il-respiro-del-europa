@@ -52,6 +52,7 @@ public class Microphone extends Thread {
 		this.sentencesAnimator = sentencesAnimator;
 		this.windWave = windWave;
 		this.ui = userInterface;
+		ui.setMicrophone(this);
 		chaosDynamics = new ChaosDynamics(ui);
 		
 		audioSignal = new AudioSignal();
@@ -174,7 +175,7 @@ public class Microphone extends Thread {
 	
 	public static void main(String[] args) throws Exception {
 
-		Microphone m = new Microphone(new SentencesAnimator(null), new WindWave(), new UserInterface());
+		Microphone m = new Microphone(new SentencesAnimator(null), new WindWave(null), new UserInterface());
 	}
 
 }

@@ -3,6 +3,8 @@ package fan;
 import java.util.*;
 import java.util.logging.Logger;
 
+import application.UserInterface;
+
 /**
  * a class that can create a kind of wave using fans driven by GPIO pins on a RPi.
  * @author sydxrey
@@ -29,11 +31,15 @@ public class WindWave {
 	}
 
 	private double chaosIntensity; // set by audio thread depending on breath detection
+	
+	private UserInterface ui;
 
 	/**
 	 * Start a WindWave in default state "IDLE"
 	 */
-	public WindWave() {
+	public WindWave(UserInterface ui) {
+		this.ui = ui;
+		ui.setWindWave(this);
 		fans = new Fan[4];
 		fans[0] = new Fan(Fan.FAN_0);
 		fans[1] = new Fan(Fan.FAN_1);
@@ -97,7 +103,7 @@ public class WindWave {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		WindWave w = new WindWave();
+		WindWave w = new WindWave(null);
 		w.setState(WindWave.State.IDLE);
 		Thread.sleep(20000);
 		w.setState(WindWave.State.CHAOS);
