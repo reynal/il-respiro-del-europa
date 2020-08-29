@@ -19,12 +19,20 @@ public class WindWave {
 	private Timer timer;
 	private State state;
 	
+	public static final double BREATHE_THR = 0.8;  // breathe below, chaos above
+	public static final double GENTLE_THR = 0.7; // gentle below
+	public static final double IDLE_THR = 0.2; // idle below
+	
+	public double breath_threshold = BREATHE_THR;
+	public double gentle_threshold = GENTLE_THR;
+	public double idle_threshold = IDLE_THR;
+	
 	public static enum State {
 		//    T(ms)     Offset1 Duty1   Offset2 Duty2   Offset3 Duty3   Offset4 Duty4
-		CHAOS(1000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
-		BREATHE(4000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
+		CHAOS(5000, 	0, 		80, 	25, 	66, 	50, 	66, 	75, 	66),
+		BREATHE(20000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
 		GENTLE(10000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
-		IDLE(20000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10);
+		IDLE(200000, 	0, 		1, 		25, 	10, 	50, 	10, 	75, 	10);
 		
 		public int T, offset0, duty0, offset1, duty1, offset2, duty2, offset3, duty3; // offset et duty sont en percentage de T (entre 0 et 100)
 		State(int T, int offset0, int duty0, int offset1, int duty1, int offset2, int duty2, int offset3, int duty3){
@@ -87,12 +95,17 @@ public class WindWave {
 	 */
 	public void setState(State state) {
 		
+		if (state == this.state) return; // on fait quelque chose que si ca change!
+		
+		if (ui!=null) ui.setWindWaveState(state);
+		
 		this.state = state;
+		LOGGER.info("!!! New WindWave state = " + state);
 		
 		if (timer != null) timer.cancel();
 		timer = new Timer();
 		
-		//if (state == State.IDLE) return;
+		if (state == State.IDLE) return; // pour le moment ca s'arrete totalement
 		
 		schedule(0, state.T, state.offset0, state.duty0);
 		schedule(1, state.T, state.offset1, state.duty1);
@@ -113,7 +126,10 @@ public class WindWave {
 		
 		chaosIntensity = intensity;
 		
-		// TODO : do something !
+		if (chaosIntensity < this.idle_threshold) setState(State.IDLE);
+		else if (chaosIntensity < this.gentle_threshold) setState(State.GENTLE);
+		else if (chaosIntensity < this.breath_threshold) setState(State.BREATHE);
+		else setState(State.CHAOS);
 		
 	}
 	

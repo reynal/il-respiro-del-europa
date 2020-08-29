@@ -8,6 +8,8 @@ import java.awt.image.RescaleOp;
 
 import javax.swing.*;
 
+import application.Preferences;
+
 /**
  * Correspond a un video projecteur. 
  * 
@@ -37,7 +39,8 @@ public class Projector extends JWindow {
 
 		this.alpha = 1.0f;
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		if (DEBUG) dim.setSize(1000, 300);
+		String str = Preferences.getPreferences().getStringProperty(Preferences.Key.WINDOW_SIZE); // "fullscreen" or "debug"
+		if (str.contentEquals("debug")) dim.setSize(1000, 300);		
 		initBufferedImage(dim);
 		add(new GraphicsPanel());
 		setSize(dim);

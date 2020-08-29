@@ -41,6 +41,10 @@ public class ChaosDynamics {
 							// and then chaosIntensity += dx and dx = deltaChaos * (1 - tmpExp)
 	private UserInterface ui;
 
+	public double chaosForceValue=1.0;
+
+	public double breathForceValue = 0.25;
+
 	// y[n] = a*y[n-1]+b*(x[n]+x[n-1])
 
 	/**
@@ -67,6 +71,9 @@ public class ChaosDynamics {
 		this.decayFactor = Math.exp(-TIMER_PERIOD_S / tau); 
 	}
 
+	public void forceChaosIntensity() {
+		chaosIntensity = chaosForceValue;
+	}
 
 	/**
 	 * Called from main audio thread on a regular basis (audio frame duration)
@@ -81,7 +88,7 @@ public class ChaosDynamics {
 			chaosIntensity *= decayFactor;
 		}
 		else {
-			System.out.println("Breath detected with force " + breathForce);
+			//System.out.println("Breath detected with force " + breathForce);
 			chaosIntensity += breathForce; // TODO : add attack phase, adjust formulae + implement it through a low-pass digital filter
 			if (chaosIntensity > 1.0)
 				chaosIntensity = 1.0;
@@ -91,6 +98,12 @@ public class ChaosDynamics {
 		
 		if (ui != null) ui.setChaosIntensity(chaosIntensity);
 			
+	}
+
+
+
+	public void forceBreath() {
+		updateDynamics(breathForceValue);
 	}
 
 }

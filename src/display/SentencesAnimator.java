@@ -3,6 +3,7 @@ package display;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.swing.Timer;
 
@@ -17,13 +18,16 @@ import application.UserInterface;
  */
 public class SentencesAnimator implements ActionListener {
 	
+	private static final Logger LOGGER = Logger.getLogger("confLogger");
+	
 	private UserInterface ui;
 	private SentencesFileReader sentencesFileReader;
 	
 	private Timer timer;
 	private double time;
 	public static final int TIMER_PERIOD_MS = 10; // ms
-	public static final int DECODER_ITERATION_PERIOD = 20; // = 10 * TIMER_PERIOD_MS = 100ms
+	public static final int DECODER_ITERATION_PERIOD = 10; // = 10 * TIMER_PERIOD_MS = 100ms
+	public int decoder_iteration_period = DECODER_ITERATION_PERIOD; 
 	
 	private Projector projector1, projector2;
 	
@@ -66,7 +70,7 @@ public class SentencesAnimator implements ActionListener {
 		
 		//System.out.println(chaosIntensity);
 
-		if (time % DECODER_ITERATION_PERIOD == 0) {
+		if (time % decoder_iteration_period == 0) {
 			double[] q0 = ldpcDec.nextIteration();
 			per = (float)ldpcDec.getPER();
 		    projector1.messUpDisplay(q0);  
@@ -137,7 +141,7 @@ public class SentencesAnimator implements ActionListener {
 	}
 	
 	private void pickNewSentencePair() {
-
+		
 		meanAlpha = 0.5;
 		ampSine = 1.0;
 		deltaMeanAlpha = (Math.random() > 0.5 ? DELTA_MEAN_ALPHA : -DELTA_MEAN_ALPHA);
@@ -145,6 +149,7 @@ public class SentencesAnimator implements ActionListener {
 		projector1.setSentence(ss[0]);
 		projector2.setSentence(ss[1]);
 		ldpcDec.initState();
+		LOGGER.info("NEW SENTENCE PAIR:" + ss[0] + " & " + ss[1]);
 	}
 	
 	// --------------------------------- test ---------------------------------
