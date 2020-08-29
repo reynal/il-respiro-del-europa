@@ -1,6 +1,5 @@
 package application;
 
-import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
@@ -19,7 +18,10 @@ public class UserInterface extends JFrame {
 	private Microphone microphone;
 	private ChaosDynamics chaosDynamics;
 	
+	private Box mainPanel;
+	
 	private JLabel microphoneLevelLBL, microphoneStatutLBL, breathForceLBL, chaosIntensityLBL;
+	private JLabel windWaveStateLBL;
 		
 	/**
 	 * 
@@ -29,18 +31,31 @@ public class UserInterface extends JFrame {
 		super();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLayout(new GridLayout(60,2));
+		mainPanel = new Box(BoxLayout.Y_AXIS);
+		//mainPanel.setLayout(new GridLayout(60,2));
 		
 		microphoneStatutLBL = addJLabel("Record from: ");
 		microphoneLevelLBL = addJLabel("Input level (dB): ");
 		breathForceLBL = addJLabel("Breath force: ");
 		chaosIntensityLBL = addJLabel("Chaos intensity: ");
-		addJSpinner("Decay time (ms)", e -> chaosDynamics.setDecayTime((Integer)((JSpinner)e.getSource()).getValue()));
+		addJButton("(Force breath by value below)", e -> chaosDynamics.forceBreath());
+		addJSpinner("Breath force value (%)", e -> chaosDynamics.breathForceValue=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		addJButton("(Force chaos to value below)", e -> chaosDynamics.forceChaosIntensity());
+		addJSpinner("Chaos force value (%)", e -> chaosDynamics.chaosForceValue=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		addJSpinner("idle below (%)", e -> windWave.idle_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		addJSpinner("gentle below (%)", e -> windWave.gentle_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		addJSpinner("breath below (%)", e -> windWave.breath_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+
+		addJSpinner("Decay time (s)", e -> chaosDynamics.setDecayTime((Integer)((JSpinner)e.getSource()).getValue()));
+		addJSpinner("DECODER_ITERATION_PERIOD (>=0)", e -> sentencesAnimator.decoder_iteration_period=((Integer)((JSpinner)e.getSource()).getValue()));
 		
-		addJButton("WindWave: state", "force CHAOS", e -> windWave.setState(WindWave.State.CHAOS));
-		addJButton("WindWave: state", "force BREATH", e -> windWave.setState(WindWave.State.BREATHE));
-		addJButton("WindWave: state", "force GENTLE", e -> windWave.setState(WindWave.State.GENTLE));
-		addJButton("WindWave: state", "force IDLE", e -> windWave.setState(WindWave.State.IDLE));
+		windWaveStateLBL = addJLabel("WindWave current state: ");
+		
+		
+		addJButton("WindWave: force CHAOS", e -> windWave.setState(WindWave.State.CHAOS));
+		addJButton("WindWave: force BREATH", e -> windWave.setState(WindWave.State.BREATHE));
+		addJButton("WindWave: force GENTLE", e -> windWave.setState(WindWave.State.GENTLE));
+		addJButton("WindWave: force IDLE", e -> windWave.setState(WindWave.State.IDLE));
 		addWindWaveJSpinner(WindWave.State.CHAOS);
 		addWindWaveJSpinner(WindWave.State.BREATHE);
 		addWindWaveJSpinner(WindWave.State.GENTLE);
@@ -48,6 +63,7 @@ public class UserInterface extends JFrame {
 		
 		//addJToggleButton("windwave", e -> System.out.println(((JToggleButton)e.getSource()).isSelected()));
 		
+		add(new JScrollPane(mainPanel));
 		this.pack();
 		//this.setSize(800,400);
 		this.setVisible(true);
@@ -71,46 +87,46 @@ public class UserInterface extends JFrame {
 
 	private JLabel addJLabel(String lbl) {
 		
+		Box box = new Box(BoxLayout.X_AXIS);
 		JLabel l1 = new JLabel(lbl);
-		l1.setHorizontalAlignment(SwingConstants.RIGHT);
-		JLabel l2 = new JLabel("                                                                   ");
-		add(l1);
-		add(l2);
+		//l1.setHorizontalAlignment(SwingConstants.LEFT);
+		JLabel l2 = new JLabel("--------------------");
+		//l2.setHorizontalAlignment(SwingConstants.LEFT);
+		box.add(l1);
+		box.add(Box.createHorizontalGlue());
+		box.add(l2);
+		mainPanel.add(box);
 		return l2;
 	}
 	
 	private JSpinner addJSpinner(String lbl, ChangeListener listener) {
 		
+		Box box = new Box(BoxLayout.X_AXIS);
 		JSpinner s = new JSpinner();
 		JLabel l = new JLabel(lbl);
-		l.setHorizontalAlignment(SwingConstants.RIGHT);
-		//Box b = new Box(BoxLayout.X_AXIS);
-		add(l);
-		add(s);
+		//l.setHorizontalAlignment(SwingConstants.RIGHT);
+		box.add(l);
+		box.add(s);
+		mainPanel.add(box);
 		//this.getContentPane().add(b);
 		//s.addChangeListener(e -> System.out.println(lbl+"="+s.getValue()));
 		if (listener != null) s.addChangeListener(listener);
 		return s;
 	}
 	
-	private JButton addJButton(String lbl, String buttonLbl, ActionListener listener) {
+	private JButton addJButton(String buttonLbl, ActionListener listener) {
 		
-		JLabel l = new JLabel(lbl);
-		l.setHorizontalAlignment(SwingConstants.RIGHT);
 		JButton b = new JButton(buttonLbl);
-		add(l);
-		add(b);
+		b.setAlignmentX(CENTER_ALIGNMENT);
+		mainPanel.add(b);
 		b.addActionListener(listener);
 		return b;
 	}
 	
 	private JToggleButton addJToggleButton(String lbl, ActionListener listener) {
 		
-		JLabel l = new JLabel(lbl);
-		l.setHorizontalAlignment(SwingConstants.RIGHT);
-		JToggleButton b = new JToggleButton("on/off");
-		add(l);
-		add(b);
+		JToggleButton b = new JToggleButton(lbl);
+		mainPanel.add(b);
 		b.addActionListener(listener);
 		return b;
 	}
@@ -190,6 +206,10 @@ public class UserInterface extends JFrame {
 
 	public void setChaosIntensity(double lvl) {
 		SwingUtilities.invokeLater(() ->  chaosIntensityLBL.setText(Double.toString(lvl)));
+	}
+
+	public void setWindWaveState(WindWave.State s) {
+		SwingUtilities.invokeLater(() ->  windWaveStateLBL.setText(s.toString()));
 	}
 
 	// --------------

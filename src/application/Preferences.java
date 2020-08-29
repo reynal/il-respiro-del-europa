@@ -20,7 +20,8 @@ public class Preferences {
 	
 	public static enum Key {
 		MIXER,
-		PLATFORM // one of PLATFORM enuml
+		PLATFORM, // one of PLATFORM enum
+		WINDOW_SIZE
 	}
 	
 	
