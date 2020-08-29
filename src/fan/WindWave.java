@@ -17,18 +17,29 @@ public class WindWave {
 	private static final Logger LOGGER = Logger.getLogger("confLogger");
 	private Fan[] fans;
 	private Timer timer;
-	//private ArrayList<TimerTask> taskList = new ArrayList<TimerTask>();
+	private State state;
 	
-	public static final int PERIOD_IDLE = 10000;
-	public static final int DURATION_IDLE = 4000;
-	
-	public static final int PERIOD_CHAOS = 10000;
-	public static final int DURATION_CHAOS= 4900;
-		
 	public static enum State {
-		IDLE,
-		CHAOS
+		//    T(ms)     Offset1 Duty1   Offset2 Duty2   Offset3 Duty3   Offset4 Duty4
+		CHAOS(1000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
+		BREATHE(4000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
+		GENTLE(10000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
+		IDLE(20000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10);
+		
+		public int T, offset0, duty0, offset1, duty1, offset2, duty2, offset3, duty3; // offset et duty sont en percentage de T (entre 0 et 100)
+		State(int T, int offset0, int duty0, int offset1, int duty1, int offset2, int duty2, int offset3, int duty3){
+			this.T=T;
+			this.offset0=offset0;
+			this.offset1=offset1;
+			this.offset2=offset2;
+			this.offset3=offset3;
+			this.duty0=duty0;
+			this.duty1=duty1;
+			this.duty2=duty2;
+			this.duty3=duty3;
+		}
 	}
+	
 
 	private double chaosIntensity; // set by audio thread depending on breath detection
 	
@@ -39,7 +50,7 @@ public class WindWave {
 	 */
 	public WindWave(UserInterface ui) {
 		this.ui = ui;
-		ui.setWindWave(this);
+		if (ui!=null) ui.setWindWave(this);
 		fans = new Fan[4];
 		fans[0] = new Fan(Fan.FAN_0);
 		fans[1] = new Fan(Fan.FAN_1);
@@ -47,19 +58,28 @@ public class WindWave {
 		fans[3] = new Fan(Fan.FAN_3);
 		
 		setState(WindWave.State.IDLE);
+		
+
 
 	}
 	
 	/**
 	 * Schedule a fan start/stop task for the given fan index
 	 * @param fanIdx 
-	 * @param initialDelay initial delay in ms
-	 * @param period total period in ms
-	 * @param onDuration duration of ON phase in ms
+	 * @param periodMs total period in ms
+	 * @param periodOffsetPercent initial delay in % of period  (from 0 to 100)
+	 * @param dutyCycle duration of ON phase in % of period (from 0 to 100)
 	 */
-	public void schedule(int fanIdx, int initialDelay, int period, int onDuration) {
-		timer.schedule(fans[fanIdx].createStartTask(), initialDelay, period);
-		timer.schedule(fans[fanIdx].createStopTask(), initialDelay+onDuration, period);
+	public void schedule(int fanIdx, int periodMs, int periodOffsetPercent, int dutyCycle) {
+		
+		if (dutyCycle < 0) dutyCycle = 0;
+		else if (dutyCycle > 100) dutyCycle = 100;
+		
+		// start at periodOffset, stops at periodOffset + period * dutyCycle / 100.0
+		int offset = (int)(0.01 * periodOffsetPercent * periodMs);
+		int onDuration = (int)(0.01 * dutyCycle * periodMs);
+		timer.schedule(fans[fanIdx].createStartTask(), offset,            periodMs); // START
+		timer.schedule(fans[fanIdx].createStopTask(),  offset+onDuration, periodMs); // STOP
 	}
 	
 	/**
@@ -67,23 +87,22 @@ public class WindWave {
 	 */
 	public void setState(State state) {
 		
+		this.state = state;
+		
 		if (timer != null) timer.cancel();
 		timer = new Timer();
-
-		switch (state) {
 		
-		case IDLE:
-			schedule(0, 0, 					PERIOD_IDLE, DURATION_IDLE);
-			schedule(1, PERIOD_IDLE / 2, 	PERIOD_IDLE, DURATION_IDLE);
-			
-			break;
+		//if (state == State.IDLE) return;
 		
-		case CHAOS:
-			schedule(0, 0, 					PERIOD_CHAOS, DURATION_CHAOS);
-			schedule(1, PERIOD_CHAOS / 2, 	PERIOD_CHAOS, DURATION_CHAOS);
-			break;
+		schedule(0, state.T, state.offset0, state.duty0);
+		schedule(1, state.T, state.offset1, state.duty1);
+		schedule(2, state.T, state.offset2, state.duty2);
+		schedule(3, state.T, state.offset3, state.duty3);
 
-		}
+	}
+	
+	State getState() {
+		return this.state;
 	}
 	
 	/**
@@ -103,10 +122,13 @@ public class WindWave {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		WindWave w = new WindWave(null);
-		w.setState(WindWave.State.IDLE);
-		Thread.sleep(20000);
-		w.setState(WindWave.State.CHAOS);
+		// open UI:
+		UserInterface ui = new UserInterface();
+		
+		WindWave w = new WindWave(ui);
+		//w.setState(WindWave.State.IDLE);
+		//Thread.sleep(20000);
+		//w.setState(WindWave.State.CHAOS); // gere par l'UI
 	}
 	
 	

@@ -53,7 +53,7 @@ public class Fan {
 	 */
 	public void setState(boolean active) {
 		
-		if (rpiPin == null) out("FAN " + pinNumber + ": " + (active ? "ON" : "OFF")); // not running on RPi
+		if (rpiPin == null) out("FAN " + pinNumber + ": " + (active ? "OFF" : "ON")); // not running on RPi
 		else rpiPin.setState(active);
 	
 	}
@@ -69,32 +69,34 @@ public class Fan {
 	/**
 	 * Makes the fan start/stop action "schedulable" by the java.util.Timer object
 	 */
-	class Task extends TimerTask {
-		
-		boolean fanState;
-		
-		public Task(boolean fanState) {
-			this.fanState = fanState;
-		}
+	class StartTask extends TimerTask {
 		
 		public void run() {
-			setState(fanState);
+			//System.out.println("start fan");
+			start();
 		}
 	}
 	
 	/**
+	 * Makes the fan start/stop action "schedulable" by the java.util.Timer object
+	 */
+	class StopTask extends TimerTask {
+		
+		public void run() {
+			//System.out.println("stop fan");
+			stop();
+		}
+	}
+
+	/**
 	 * @return a TimerTask suited for a util.Timer object
 	 */
-	Task createTask(boolean fanState) {
-		return new Task(fanState);
+	TimerTask createStartTask() {
+		return new StartTask();
 	}
 
-	Task createStartTask() {
-		return new Task(false);
-	}
-
-	Task createStopTask() {
-		return new Task(true);
+	TimerTask createStopTask() {
+		return new StopTask();
 	}
 
 	// ------------------------- test -------------------------------------

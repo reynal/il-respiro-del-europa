@@ -20,7 +20,7 @@ public class UserInterface extends JFrame {
 	private ChaosDynamics chaosDynamics;
 	
 	private JLabel microphoneLevelLBL, microphoneStatutLBL, breathForceLBL, chaosIntensityLBL;
-	
+		
 	/**
 	 * 
 	 */
@@ -29,22 +29,28 @@ public class UserInterface extends JFrame {
 		super();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLayout(new GridLayout(5,2));
+		this.setLayout(new GridLayout(60,2));
 		
 		microphoneStatutLBL = addJLabel("Record from: ");
 		microphoneLevelLBL = addJLabel("Input level (dB): ");
 		breathForceLBL = addJLabel("Breath force: ");
 		chaosIntensityLBL = addJLabel("Chaos intensity: ");
 		addJSpinner("Decay time (ms)", e -> chaosDynamics.setDecayTime((Integer)((JSpinner)e.getSource()).getValue()));
-		//addJSpinner("Decay time (ms)", e -> System.out.println(((JSpinner)e.getSource()).getValue().getClass()));
+		
+		addJButton("WindWave: state", "force CHAOS", e -> windWave.setState(WindWave.State.CHAOS));
+		addJButton("WindWave: state", "force BREATH", e -> windWave.setState(WindWave.State.BREATHE));
+		addJButton("WindWave: state", "force GENTLE", e -> windWave.setState(WindWave.State.GENTLE));
+		addJButton("WindWave: state", "force IDLE", e -> windWave.setState(WindWave.State.IDLE));
+		addWindWaveJSpinner(WindWave.State.CHAOS);
+		addWindWaveJSpinner(WindWave.State.BREATHE);
+		addWindWaveJSpinner(WindWave.State.GENTLE);
+		addWindWaveJSpinner(WindWave.State.IDLE);
 		
 		//addJToggleButton("windwave", e -> System.out.println(((JToggleButton)e.getSource()).isSelected()));
-		//addJButton("new sentence", "load", e -> System.out.println("push"));
 		
 		this.pack();
 		//this.setSize(800,400);
 		this.setVisible(true);
-		
 	}
 	
 	public void setChaosDynamics(ChaosDynamics chaosDynamics) {
@@ -107,6 +113,65 @@ public class UserInterface extends JFrame {
 		add(b);
 		b.addActionListener(listener);
 		return b;
+	}
+	
+	// --------------
+	
+	private void addWindWaveJSpinner(WindWave.State state) {
+		addJSpinner(
+				"WindWave " + state + ": T(ms)", 
+				e -> {
+					state.T=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": offset0(%)",
+				e -> {
+					state.offset0=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": duty0(%)",
+				e -> {
+					state.duty0=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": offset1(%)",
+				e -> {
+					state.offset1=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": duty1(%)",
+				e -> {
+					state.duty1=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": offset2(%)",
+				e -> {
+					state.offset2=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": duty2(%)",
+				e -> {
+					state.duty2=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": offset3(%)",
+				e -> {
+					state.offset3=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
+		addJSpinner(
+				"WindWave " + state + ": duty3(%)",
+				e -> {
+					state.duty3=((Integer)((JSpinner)e.getSource()).getValue());
+					windWave.setState(state);}
+				);
 	}
 	
 	// --------------
