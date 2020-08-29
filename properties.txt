@@ -20,5 +20,5 @@ PLAFORM=raspberrypi
 MIXER=U0x46d0x825 [plughw:1,0]
 #
 # window size: 
-#WINDOW_SIZE=fullscreen
-WINDOW_SIZE=debug
+WINDOW_SIZE=fullscreen
+#WINDOW_SIZE=debug

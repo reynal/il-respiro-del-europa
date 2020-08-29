@@ -105,7 +105,10 @@ public class WindWave {
 		if (timer != null) timer.cancel();
 		timer = new Timer();
 		
-		if (state == State.IDLE) return; // pour le moment ca s'arrete totalement
+		if (state == State.IDLE) {
+			for (int fanIdx=0; fanIdx < 4; fanIdx++) fans[fanIdx].stop();
+			return; // pour le moment ca s'arrete totalement
+		}
 		
 		schedule(0, state.T, state.offset0, state.duty0);
 		schedule(1, state.T, state.offset1, state.duty1);

@@ -59,10 +59,12 @@ public class Fan {
 	}
 		
 	public void start() {
+		System.out.println("start fan");
 		setState(false);
 	}
 	
 	public void stop() {
+		System.out.println("stop fan");
 		setState(true);
 	}
 	
@@ -103,14 +105,16 @@ public class Fan {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		Fan v = new Fan(FAN_2);
+		Fan v = new Fan(FAN_0);
 		int i=0;
 		boolean active = false;
 		while(i++ < 10) {
 			System.out.println(i);
-			v.setState(active);
-			active = !active;
-			Thread.sleep((int)(1000));// * Math.random()));
+			v.start();
+			//active = !active;
+			Thread.sleep((int)(1000));
+			v.stop();
+			Thread.sleep(1000);// * Math.random()));
 		}
 	}
 
