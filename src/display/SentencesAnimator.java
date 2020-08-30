@@ -1,5 +1,8 @@
 package display;
 
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -51,7 +54,14 @@ public class SentencesAnimator implements ActionListener {
 		sentencesFileReader = new SentencesFileReader();
 		
 		projector1 = new Projector(0);
-		projector2 = new Projector(1);
+		if (GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices().length > 1)
+			projector2 = new Projector(1);
+		else
+			{
+			projector2 = new Projector(0);
+			Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+			projector2.setLocation(dim.width/2+5, 0);
+			}
 		ldpcDec = new LdpcDecoder(); 
 
 		timer = new Timer(TIMER_PERIOD_MS, this);

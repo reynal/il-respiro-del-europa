@@ -1,5 +1,7 @@
 package application;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.*;
 
 import javax.swing.*;
@@ -64,8 +66,10 @@ public class UserInterface extends JFrame {
 		//addJToggleButton("windwave", e -> System.out.println(((JToggleButton)e.getSource()).isSelected()));
 		
 		add(new JScrollPane(mainPanel));
-		this.pack();
-		//this.setSize(800,400);
+		//this.pack();
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		this.setSize(600,dim.height/2);
+		this.setLocation(0,dim.height/2);
 		this.setVisible(true);
 	}
 	

@@ -34,13 +34,12 @@ public class Projector extends JWindow {
 	 */
 	public Projector(int screen) {
 
-		super(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[screen]
-				.getDefaultConfiguration()); // pour afficher sur ecran I ou II
+		super(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[screen].getDefaultConfiguration()); // pour afficher sur ecran I ou II
 
 		this.alpha = 1.0f;
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		String str = Preferences.getPreferences().getStringProperty(Preferences.Key.WINDOW_SIZE); // "fullscreen" or "debug"
-		if (str.contentEquals("debug")) dim.setSize(1000, 300);		
+		if (str.contentEquals("debug")) dim.height /= 2;		
 		initBufferedImage(dim);
 		add(new GraphicsPanel());
 		setSize(dim);
