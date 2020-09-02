@@ -18,9 +18,10 @@ import java.util.Random;
 
 public class LdpcDecoder {
 
-	public int tmp_bit[]; // tentative decision word
+	//public int tmp_bit[]; // tentative decision word
 	public double q0[]; // posterior proba of bit[i]=0
 
+	private final int noffs = 13000; // throw away the first noffs bits from q0 
 	private double alpha[][];
 	private double beta[][];
 	private double lambda[];
@@ -116,9 +117,9 @@ public class LdpcDecoder {
 		beta = new double[m][rmax];
 		lambda = new double[n];
 		posterior = new double[n];
-		q0 = new double[n];
+		q0 = new double[n-noffs];
 
-		tmp_bit = new int[n];
+		//tmp_bit = new int[n];
 		
 		initPER = 0.09; // TODO compute this at each re-init
 		
@@ -208,10 +209,10 @@ public class LdpcDecoder {
 			}
 			posterior[i] = lambda[i] + sum;
 			
-			if (posterior[i] > 0)
-				tmp_bit[i] = 0;
-			else
-				tmp_bit[i] = 1;
+//			if (posterior[i] > 0)
+//				tmp_bit[i] = 0;
+//			else
+//				tmp_bit[i] = 1;
 		}
 
 		// SR pending: if (ldpc != null) ldpc.updateImages(q0);
@@ -228,10 +229,10 @@ public class LdpcDecoder {
 	 */
 	
 	public double getPER() {
-		int n = q0.length;
+		int nq = q0.length;
         double sum = 0.0;
-        for (int i=0; i<n; i++) sum += q0[i];
-		return Math.min(1.0, 0.5*(1.0-(sum/(double)n))/initPER); // 0.5 * proba erreur		
+        for (int i=0; i<nq; i++) sum += q0[i];
+		return Math.min(1.0, 0.5*(1.0-(sum/(double)nq))/initPER); // 0.5 * proba erreur		
 	}
 
 	/**
@@ -239,8 +240,8 @@ public class LdpcDecoder {
 	 * @param llr
 	 */
 	private void calc_q0(double[] llr) {
-		for (int i=0; i<llr.length; i++)
-			q0[i] = Math.exp(llr[i]) / (1 + Math.exp(llr[i])); // beliefs			
+		for (int i=noffs; i<llr.length; i++)
+			q0[i-noffs] = Math.exp(llr[i]) / (1 + Math.exp(llr[i])); // beliefs			
 	}
 	
 	
