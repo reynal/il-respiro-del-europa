@@ -20,7 +20,7 @@ import application.Preferences;
 @SuppressWarnings("serial")
 public class Projector extends JWindow {
 
-	private final static boolean DEBUG = true;
+	private final static boolean DEBUG = false;
 
 	private float alpha; // alpha composite
 	private float brightness = 1.0f;
@@ -110,7 +110,7 @@ public class Projector extends JWindow {
         	bufferedImage.getRGB(0,cy,width,4,pix,0,width);
             for (int cx=0;cx<width;cx+=4) {
             	// starts low (transparent, hence light gray), goes large (opaque, dark) in the end                
-            	int a = q0i[(311*(cx/4)+313*(cy/4))%n] << 24; 	
+            	int a = q0i[(251*(cx/4)+(257)*(cy/4))%n] << 24; 	
             	pix[cx] = (pix[cx] & 0xffffff) | a;
             	pix[cx+1] = (pix[cx+1] & 0xffffff) | a;
             	pix[cx+2] = (pix[cx+2] & 0xffffff) | a;
@@ -140,14 +140,14 @@ public class Projector extends JWindow {
      * @param y
      */
     private void drawString(Graphics g, String text, int x, int y) {
-    	int textWidth = 0;
+    	//int textWidth = 0;
         int textHeight = 0; 
         int lineHeight = g.getFontMetrics().getHeight();
         for (String line : text.split("\\|")) {
-        	textWidth = Math.max(textWidth,g.getFontMetrics().stringWidth(line));
+        	//textWidth = Math.max(textWidth,g.getFontMetrics().stringWidth(line));
         	textHeight += lineHeight;
         }
-        x += (getWidth()-textWidth)/2; // center for all lines
+        x += (getWidth())/2; // center for all lines
         y += (getHeight()-textHeight)/2; // center of text block 
         //System.out.println("x="+x);
         //System.out.println("y="+y);
@@ -157,7 +157,7 @@ public class Projector extends JWindow {
 	
 	public void messUpDisplay (double[] q0) {
 		if (q0i == null) q0i = new int[q0.length]; // length shall not change
-		System.out.println("mess up here");
+		//System.out.println("mess up here");
 		for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);
 	}
 	
@@ -172,7 +172,7 @@ public class Projector extends JWindow {
 			int len = q0.length;
 			t0 = t0*(len/p); // start of stride to copy
 			t1 = (t1*(len/p)+len-1) % len; // end of stride
-			System.out.println("last = "+t0+" cur = "+t1);
+			//System.out.println("last = "+t0+" cur = "+t1);
 			for (int i=t0; i != t1; i=(i+1)%len) 
 				q0i[i] = (int)(255*q0[i]);
 		}
