@@ -117,7 +117,7 @@ public class SentencesAnimator implements ActionListener {
 		float alpha = (float)(meanAlpha + sine(a1, f1) + sine(a2, f2) + sine(a3, f3) + per * (Math.random()-0.5));
 		alpha = Math.max(alpha, 0);
 		alpha = Math.min(alpha, 1);
-		//alpha = 0f; // debug
+		//alpha = 0.5f; // debug
 		
 		//System.out.println("alpha= "+alpha);
 		//System.out.println("chaosIntensity= "+chaosIntensity);
@@ -128,7 +128,9 @@ public class SentencesAnimator implements ActionListener {
 		//chaosIntensity = 1.0f;
 		projector1.setAlpha(alpha * chaosIntensity);  // TODO alpha1
 		projector2.setAlpha((1-alpha) * chaosIntensity); 
-		
+		//projector1.setAlpha(1.0f);
+		//projector2.setAlpha(1.0f);
+
 		projector1.repaint();
 		projector2.repaint();
 
@@ -182,7 +184,7 @@ public class SentencesAnimator implements ActionListener {
 		
 		Thread t = new Thread(() -> {
 			while(true) {
-			sa.setChaosIntensity(Math.random()); 
+			sa.setChaosIntensity(0.8); // Math.random()); 
 			try {
 				Thread.sleep((long) (10000 * Math.random()));
 			} catch (InterruptedException e) {

@@ -16,7 +16,7 @@ public class ChaosDynamics {
 	private static final Logger LOGGER = Logger.getLogger("confLogger");
 
 	//public static final double ATTACK_S = 1.; // s
-	public static final double DECAY_S = 2.; // s
+	public static final double DECAY_S = 20.; // s
 	public final static double TIMER_PERIOD_S = (double)AudioConstants.BUF_LEN / AudioConstants.SAMPLE_FREQ;
 
 
