@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import application.Preferences;
 
+
 /**
  * Correspond a un video projecteur. 
  * 
@@ -26,7 +27,9 @@ public class Projector extends JWindow {
 	private BufferedImage bufferedImage = null;
 
 	private String sentence="initial test string";
-	private double[] q0;
+	private int width, height; // of bufferedImage
+	private int[] pix; // tmp pixels for messing up image
+	private int[] q0i;
 
 	/**
 	 * 
@@ -49,7 +52,10 @@ public class Projector extends JWindow {
 	}
 	
 	private void initBufferedImage(Dimension dim) {
-		bufferedImage = new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB);
+		width = dim.width & 0xfffc; // must be multiple of 4
+		height = dim.height & 0xfffc;
+		bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		pix = new int[4*width];
         /*Graphics2D g = (Graphics2D)bufferedImage.getGraphics();
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());*/
@@ -91,28 +97,38 @@ public class Projector extends JWindow {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha)); // alpha=0 => transparent pixel
         g.setPaint(Color.WHITE);
         g.setFont(new Font("Serif", Font.PLAIN, 50));
-        int textWidth = g.getFontMetrics().stringWidth(sentence);
-        g.drawString(sentence, 0.5f*(getWidth()-textWidth), 0.5f*getHeight());
+ //       int textWidth = g.getFontMetrics().stringWidth(sentence);
+        this.drawString(g,sentence, 0, 0);
 
         // add noise from ldpc decoder:
-        //q0=null; //debug
-        if (q0 == null) return;
-        int n = q0.length;
+        //q0i=null; //debug
+        if (q0i == null) return;
+        int n = q0i.length;
         //int alpha []= q0*255.0 % 0xff;
-        for (int cx=0;cx<bufferedImage.getWidth();cx++) {          
-            for (int cy=0;cy<bufferedImage.getHeight();cy++) {
-                int color = bufferedImage.getRGB(cx, cy) & 0xffffff;
-    
-                int a = (int)(q0[(cx/4+bufferedImage.getWidth()*(cy/4))%n]*255.0); // starts low (transparent, hence light gray), goes large (opaque, dark) in the end
-                //a=20; debug
-                //float a = (float)q0[(cx/4+bufferedImage.getWidth()*(cy/4))%n];
-                
-                //a = (cx/16+image.getWidth()*0/16)%255; debug claudio
-                int newcolor = color | (a <<24);
-                bufferedImage.setRGB(cx, cy, newcolor);
-                //g.setPaint(new Color(a,a,a));
-                //g.fill(new Rectangle2D.Double(cx, cy, 1, 1));
+
+        for (int cy=0;cy<height;cy+=4) {   
+        	bufferedImage.getRGB(0,cy,width,4,pix,0,width);
+            for (int cx=0;cx<width;cx+=4) {
+            	// starts low (transparent, hence light gray), goes large (opaque, dark) in the end                
+            	int a = q0i[(311*(cx/4)+313*(cy/4))%n] << 24; 	
+            	pix[cx] = (pix[cx] & 0xffffff) | a;
+            	pix[cx+1] = (pix[cx+1] & 0xffffff) | a;
+            	pix[cx+2] = (pix[cx+2] & 0xffffff) | a;
+            	pix[cx+3] = (pix[cx+3] & 0xffffff) | a;
+            	pix[cx+width] = (pix[cx+width] & 0xffffff) | a;
+            	pix[cx+1+width] = (pix[cx+1+width] & 0xffffff) | a;
+            	pix[cx+2+width] = (pix[cx+2+width] & 0xffffff) | a;
+            	pix[cx+3+width] = (pix[cx+3+width] & 0xffffff) | a;
+            	pix[cx+width*2] = (pix[cx+width*2] & 0xffffff) | a;
+            	pix[cx+1+width*2] = (pix[cx+1+width*2] & 0xffffff) | a;
+            	pix[cx+2+width*2] = (pix[cx+2+width*2] & 0xffffff) | a;
+            	pix[cx+3+width*2] = (pix[cx+3+width*2] & 0xffffff) | a;
+            	pix[cx+width*3] = (pix[cx+width*3] & 0xffffff) | a;
+            	pix[cx+1+width*3] = (pix[cx+1+width*3] & 0xffffff) | a;
+            	pix[cx+2+width*3] = (pix[cx+2+width*3] & 0xffffff) | a;
+            	pix[cx+3+width*3] = (pix[cx+3+width*3] & 0xffffff) | a;
             }
+            bufferedImage.setRGB(0,cy,width,4,pix,0,width);
         }
 	}
 	
@@ -120,17 +136,46 @@ public class Projector extends JWindow {
      * Draw a multiline string into a graphics
      * @param g: graphics
      * @param text
-     * @param x: hor position
+     * @param x: hor offset
      * @param y
      */
     private void drawString(Graphics g, String text, int x, int y) {
+    	int textWidth = 0;
+        int textHeight = 0; 
         int lineHeight = g.getFontMetrics().getHeight();
-        for (String line : text.split("\n"))
-            g.drawString(line, x, y += 2*lineHeight);
+        for (String line : text.split("\\|")) {
+        	textWidth = Math.max(textWidth,g.getFontMetrics().stringWidth(line));
+        	textHeight += lineHeight;
+        }
+        x += (getWidth()-textWidth)/2; // center for all lines
+        y += (getHeight()-textHeight)/2; // center of text block 
+        //System.out.println("x="+x);
+        //System.out.println("y="+y);
+        for (String line : text.split("\\|"))
+            g.drawString(line, x-g.getFontMetrics().stringWidth(line)/2, y += lineHeight);
     }
 	
 	public void messUpDisplay (double[] q0) {
-		this.q0 = q0;
+		if (q0i == null) q0i = new int[q0.length]; // length shall not change
+		System.out.println("mess up here");
+		for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);
+	}
+	
+	public void messUpDisplay (double[] q0, int t0, int t1, int p) {	
+		if (q0 == null) return;
+		if (q0i == null) {
+			q0i = new int[q0.length]; // length shall not change
+			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);
+		}
+		else {
+			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);			
+			int len = q0.length;
+			t0 = t0*(len/p); // start of stride to copy
+			t1 = (t1*(len/p)+len-1) % len; // end of stride
+			System.out.println("last = "+t0+" cur = "+t1);
+			for (int i=t0; i != t1; i=(i+1)%len) 
+				q0i[i] = (int)(255*q0[i]);
+		}
 	}
 	
 	// ------------------------------------------------------------------------------------

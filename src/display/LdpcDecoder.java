@@ -5,6 +5,7 @@ import java.util.*;
 //import java.math.*;
 import java.io.*;
 //import javax.swing.*;
+import java.util.Random;
 
 /**
  * LDPC decoder class Skeleton of class taken from
@@ -25,6 +26,7 @@ public class LdpcDecoder {
 	private double lambda[];
 	private double posterior[];
 
+	private Random rng;
 	private double damping;
 	
 	private double initPER; // initial P_err
@@ -48,6 +50,7 @@ public class LdpcDecoder {
 	 */
 	public LdpcDecoder() throws IOException {
 
+		rng = new Random(); 
 		damping = 1.0;
 		String filename = "rate0.50_irreg_dvbs2_N64800.alist";
 
@@ -177,7 +180,7 @@ public class LdpcDecoder {
 
 	/** Runs one decoder iteration and return the beliefs - die können benutzt werden, um Noise im BufferImage zu fabrizieren */
 	public double[] nextIteration() {
-		
+		damping = 0.9+0.1*rng.nextGaussian();
 		// row operation
 		for (int i = 0; i <= m - 1; i++) {
 			double sum = 0.0;

@@ -27,7 +27,8 @@ public class SentencesAnimator implements ActionListener {
 	private SentencesFileReader sentencesFileReader;
 	
 	private Timer timer;
-	private double time;
+	private int time;
+	private int lastModTime;
 	public static final int TIMER_PERIOD_MS = 10; // ms
 	public static final int DECODER_ITERATION_PERIOD = 10; // = 10 * TIMER_PERIOD_MS = 100ms
 	public int decoder_iteration_period = DECODER_ITERATION_PERIOD; 
@@ -35,8 +36,9 @@ public class SentencesAnimator implements ActionListener {
 	private Projector projector1, projector2;
 	
 	private LdpcDecoder ldpcDec;
-	
+	private double[] q0 = null;
 	private float per;
+	
 	private double chaosIntensity; // set by audio thread depending on breath detection
 	private double meanAlpha = 0.5;
 	private double deltaMeanAlpha;
@@ -50,7 +52,8 @@ public class SentencesAnimator implements ActionListener {
 		
 		this.ui = ui;
 		if (ui!= null) ui.setSentencesAnimator(this);
-		this.time = 0.0;
+		this.time = 0;
+		lastModTime = 0;
 		sentencesFileReader = new SentencesFileReader();
 		
 		projector1 = new Projector(0);
@@ -79,14 +82,20 @@ public class SentencesAnimator implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		
 		//System.out.println(chaosIntensity);
-
-		if (time % decoder_iteration_period == 0) {
-			double[] q0 = ldpcDec.nextIteration();
+		
+		int curModTime = (time % decoder_iteration_period);
+		if (curModTime == 0) {
+			q0 = ldpcDec.nextIteration();
 			per = (float)ldpcDec.getPER();
-		    projector1.messUpDisplay(q0);  
-		    projector2.messUpDisplay(q0);
+		    
 			//System.out.println("per = "+per);
 		}
+		//else { // partial copy of q0
+			projector1.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);  
+		    projector2.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);
+			
+		//}		
+	    lastModTime = curModTime;
 		
 		// make alpha evolve towards one sentence only with sine modulation waning off:		
 		meanAlpha += deltaMeanAlpha;
@@ -159,6 +168,9 @@ public class SentencesAnimator implements ActionListener {
 		projector1.setSentence(ss[0]);
 		projector2.setSentence(ss[1]);
 		ldpcDec.initState();
+		projector1.messUpDisplay(ldpcDec.q0);  // full copy of q0
+	    projector2.messUpDisplay(ldpcDec.q0);
+		
 		LOGGER.info("NEW SENTENCE PAIR:" + ss[0] + " & " + ss[1]);
 	}
 	
