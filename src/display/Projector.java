@@ -98,10 +98,16 @@ public class Projector extends JWindow {
         g.setPaint(Color.WHITE);
         g.setFont(new Font("Serif", Font.PLAIN, 50));
  //       int textWidth = g.getFontMetrics().stringWidth(sentence);
-        this.drawString(g,sentence, 0, 0);
+        //this.drawString(g,sentence, 0, 0);
 
         // add noise from ldpc decoder:
         //q0i=null; //debug
+        int textWidth = g.getFontMetrics().stringWidth(sentence);
+        int textHeight = g.getFontMetrics().getHeight();
+        g.drawString(sentence, (getWidth()-textWidth)/2, (getHeight()+textHeight)/2);
+
+        // add noise from ldpc decoder:
+        q0i=null; //debug
         if (q0i == null) return;
         int n = q0i.length;
         //int alpha []= q0*255.0 % 0xff;
@@ -156,6 +162,8 @@ public class Projector extends JWindow {
     }
 	
 	public void messUpDisplay (double[] q0) {
+
+		if (q0 == null) return;
 		if (q0i == null) q0i = new int[q0.length]; // length shall not change
 		System.out.println("mess up here");
 		for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);

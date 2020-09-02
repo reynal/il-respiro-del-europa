@@ -21,10 +21,10 @@ public class Fan {
 	
 	private static final Logger LOGGER = Logger.getLogger("confLogger");
 
-	public final static com.pi4j.io.gpio.Pin FAN_0 = RaspiPin.GPIO_26; // pin 32 (GPIO_XX = wPi numbering scheme)
-	public final static com.pi4j.io.gpio.Pin FAN_1 = RaspiPin.GPIO_27; // pin 36 
-	public final static com.pi4j.io.gpio.Pin FAN_2 = RaspiPin.GPIO_28; // pin 38 
-	public final static com.pi4j.io.gpio.Pin FAN_3 = RaspiPin.GPIO_29; // pin 40
+	public final static com.pi4j.io.gpio.Pin FAN_3 = RaspiPin.GPIO_26; // pin 32 (GPIO_XX = wPi numbering scheme)
+	public final static com.pi4j.io.gpio.Pin FAN_2 = RaspiPin.GPIO_27; // pin 36 
+	public final static com.pi4j.io.gpio.Pin FAN_1 = RaspiPin.GPIO_28; // pin 38 
+	public final static com.pi4j.io.gpio.Pin FAN_0 = RaspiPin.GPIO_29; // pin 40
 	
 	private GpioPinDigitalOutput rpiPin;
 	private com.pi4j.io.gpio.Pin pinNumber;
@@ -59,12 +59,12 @@ public class Fan {
 	}
 		
 	public void start() {
-		System.out.println("start fan");
+		System.out.println("start fan " + pinNumber);
 		setState(false);
 	}
 	
 	public void stop() {
-		System.out.println("stop fan");
+		System.out.println("stop fan " + pinNumber);
 		setState(true);
 	}
 	
@@ -105,16 +105,16 @@ public class Fan {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		Fan v = new Fan(FAN_0);
+		Fan v = new Fan(FAN_2);
 		int i=0;
 		boolean active = false;
 		while(i++ < 10) {
 			System.out.println(i);
 			v.start();
 			//active = !active;
-			Thread.sleep((int)(1000));
+			Thread.sleep(1000);
 			v.stop();
-			Thread.sleep(1000);// * Math.random()));
+			Thread.sleep(5000);// * Math.random()));
 		}
 	}
 
