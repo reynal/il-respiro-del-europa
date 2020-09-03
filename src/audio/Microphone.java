@@ -141,7 +141,7 @@ public class Microphone extends Thread {
 			ui.setMicrophoneLevel(level);
 			//breath_energy -= breath_pwr[i];
 			if (breathDetector.isBreath()) {				
-				breath_pwr[i] = 1-level/SILENCE_THRESHOLD_DB;
+				breath_pwr[i] = 1-level/this.breathDetector.silence_threshold_db;
 				//breath_energy += breath_pwr[i];				
 			}
 			else {

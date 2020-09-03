@@ -1,10 +1,7 @@
 package audio;
 
 import static application.Main.out;
-import static audio.AudioConstants.BUF_LEN_SAMPLES;
-import static audio.AudioConstants.SAMPLE_FREQ;
-import static audio.AudioConstants.FFT_SIZE;
-import static audio.AudioConstants.SILENCE_THRESHOLD_DB;
+import static audio.AudioConstants.*;
 //import static audio.AudioConstants.I200HZ;
 //import static audio.AudioConstants.I500HZ;
 //import static audio.AudioConstants.I1000HZ;
@@ -20,6 +17,8 @@ import java.util.logging.Logger;
 import java.util.Arrays;
 
 import javax.sound.sampled.TargetDataLine;
+
+import application.Preferences;
 
 /**
  * A discriminating algorithm between a breath audio signal and a simple conversation of visitors in front of the microphone.
@@ -63,12 +62,15 @@ public class BreathDetector {
 	
 	private final int freqMinIdx; // anything freq below is zeroed
 
+	/* package access */ double silence_threshold_db=-40;
+	
 	/**
 	 * Creates a breath detector for the given signal
 	 */
 	public BreathDetector(AudioSignal signal){
 
 		this.signal = signal;
+		this.silence_threshold_db = Preferences.getPreferences().getIntProperty(Preferences.Key.SILENCE_THRESHOLD_DB);
 
 		// init FFT window:
 		for (int i=0; i<BUF_LEN_SAMPLES; i++) {
@@ -89,7 +91,7 @@ public class BreathDetector {
 	 */
 	public boolean isBreath() { 
 		
-		if (signal.level_dB() < SILENCE_THRESHOLD_DB) {
+		if (signal.level_dB() < this.silence_threshold_db) {
 			//out("BreathDectector: signal below threshold");
 			return false;
 		}
