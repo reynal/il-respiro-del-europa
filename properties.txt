@@ -36,7 +36,7 @@ CHAOS_NEW_SENTENCES_THR_LOW=0.5
 # ca passe en windwave chaos si chaos > ce seuil
 CHAOS_WW_THR=0.8
 #
-# windwave timings:
+# windwave timings en mode chaos:
 # T en ms
 # offset en % (0-100)
 # duty en ms
@@ -49,6 +49,17 @@ WW_DUTY0=2000
 WW_DUTY1=2000
 WW_DUTY2=2000
 WW_DUTY3=3000
+#
+# idem en mode IDLE:
+WW_T_IDLE=120000
+WW_OFFSET0_IDLE=20
+WW_OFFSET1_IDLE=32
+WW_OFFSET2_IDLE=47
+WW_OFFSET3_IDLE=88
+WW_DUTY0_IDLE=1000
+WW_DUTY1_IDLE=1000
+WW_DUTY2_IDLE=1000
+WW_DUTY3_IDLE=1000
 
 
 
