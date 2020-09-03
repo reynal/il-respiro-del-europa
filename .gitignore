@@ -2,3 +2,6 @@
 .DS_Store
 .classpath
 
+/fft.bin
+/wave.bin
+/properties.txt

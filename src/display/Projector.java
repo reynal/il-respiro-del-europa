@@ -23,11 +23,12 @@ public class Projector extends JWindow {
 	private final static boolean DEBUG = false;
 
 	private float alpha; // alpha composite
+	private double noiseAlphaMax = 1.0f;
 	private float brightness = 1.0f;
 	private BufferedImage bufferedImage = null;
 
 	private String sentence="initial test string";
-	private int width, height; // of bufferedImage
+	
 	private int[] pix; // tmp pixels for messing up image
 	private int[] q0i;
 
@@ -52,10 +53,8 @@ public class Projector extends JWindow {
 	}
 	
 	private void initBufferedImage(Dimension dim) {
-		width = dim.width & 0xfffc; // must be multiple of 4
-		height = dim.height & 0xfffc;
-		bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		pix = new int[4*width];
+		bufferedImage = new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB);
+		pix = new int[4*dim.width];
         /*Graphics2D g = (Graphics2D)bufferedImage.getGraphics();
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());*/
@@ -67,6 +66,15 @@ public class Projector extends JWindow {
 	 */
 	public void setAlpha(double alpha) {
 		this.alpha = (float)alpha;
+		//repaint();
+	}
+	
+	/**
+	 * Change the max noise alpha composite parameter for this video projector
+	 * @param alpha
+	 */
+	public void setNoiseAlphaMax(double alpha) {
+		this.noiseAlphaMax = (float)alpha;
 		//repaint();
 	}
 	
@@ -96,20 +104,23 @@ public class Projector extends JWindow {
         // draw sentence in white with alpha transparency:
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha)); // alpha=0 => transparent pixel
         g.setPaint(Color.WHITE);
-        g.setFont(new Font("Serif", Font.PLAIN, 50));
+        g.setFont(new Font("Serif", Font.PLAIN, 72));
  //       int textWidth = g.getFontMetrics().stringWidth(sentence);
-        //this.drawString(g,sentence, 0, 0);
+        this.drawString(g,sentence, 0, 0);
 
         // add noise from ldpc decoder:
         //q0i=null; //debug
-        int textWidth = g.getFontMetrics().stringWidth(sentence);
-        int textHeight = g.getFontMetrics().getHeight();
-        g.drawString(sentence, (getWidth()-textWidth)/2, (getHeight()+textHeight)/2);
+        //int textWidth = g.getFontMetrics().stringWidth(sentence);
+        //int textHeight = g.getFontMetrics().getHeight();
+        //g.drawString(sentence, (getWidth()-textWidth)/2, (getHeight()+textHeight)/2);
 
         // add noise from ldpc decoder:
-        q0i=null; //debug
+        //q0i=null; //debug
         if (q0i == null) return;
-        int n = q0i.length;
+        final int n = q0i.length;
+        final int width = bufferedImage.getWidth() & 0xfffc; // must be multiple of 4
+		final int height = bufferedImage.getHeight() & 0xfffc;
+
         //int alpha []= q0*255.0 % 0xff;
 
         for (int cy=0;cy<height;cy+=4) {   
@@ -162,27 +173,26 @@ public class Projector extends JWindow {
     }
 	
 	public void messUpDisplay (double[] q0) {
-
 		if (q0 == null) return;
 		if (q0i == null) q0i = new int[q0.length]; // length shall not change
 		//System.out.println("mess up here");
-		for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);
+		for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]*noiseAlphaMax);
 	}
 	
 	public void messUpDisplay (double[] q0, int t0, int t1, int p) {	
 		if (q0 == null) return;
 		if (q0i == null) {
 			q0i = new int[q0.length]; // length shall not change
-			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);
+			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]*noiseAlphaMax);
 		}
 		else {
-			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]);			
+			//for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]*noiseAlphaMax);			
 			int len = q0.length;
-			t0 = t0*(len/p); // start of stride to copy
-			t1 = (t1*(len/p)+len-1) % len; // end of stride
+			//t0 = t0*(len/p); // start of stride to copy
+			//t1 = (t1*(len/p)+len-1) % len; // end of stride
 			//System.out.println("last = "+t0+" cur = "+t1);
-			for (int i=t0; i != t1; i=(i+1)%len) 
-				q0i[i] = (int)(255*q0[i]);
+			for (int i=t1; i<len; i+=p) 
+				q0i[i] = (int)(255*q0[i]*noiseAlphaMax);
 		}
 	}
 	
@@ -210,8 +220,8 @@ public class Projector extends JWindow {
 	        			new float[]{0, 0, 0, 0}, // offsets for red, green, blue, alpha
 	        			null), // You can supply RenderingHints here if you want to //TODO : anti aliasing
 	        		0, 0);*/
-	        g.drawImage(bufferedImage, new AffineTransform(1f,0f,0f,1f,0f,0f), null);
-
+	        //g.drawImage(bufferedImage, new AffineTransform(1f,0f,0f,1f,0f,0f), null);
+	        g.drawImage(bufferedImage,0,0,Color.WHITE,null);
 	    }
 	}
 

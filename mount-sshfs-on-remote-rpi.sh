@@ -1,2 +1,2 @@
 #!/bin/bash
-sshfs rpi-respiro:/home/pi/respiro/bin bin/
+sshfs pi@raspberrypi.local:/home/pi/il-respiro-dell-europa/bin bin/

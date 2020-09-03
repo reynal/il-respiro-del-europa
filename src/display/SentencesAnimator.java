@@ -36,7 +36,6 @@ public class SentencesAnimator implements ActionListener {
 	private Projector projector1, projector2;
 	
 	private LdpcDecoder ldpcDec;
-	private double[] q0 = null;
 	private float per;
 	
 	private double chaosIntensity; // set by audio thread depending on breath detection
@@ -59,12 +58,14 @@ public class SentencesAnimator implements ActionListener {
 		projector1 = new Projector(0);
 		if (GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices().length > 1)
 			projector2 = new Projector(1);
-		else
-			{
+		else {
 			projector2 = new Projector(0);
 			Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 			projector2.setLocation(dim.width/2+5, 0);
-			}
+		}
+		projector1.setNoiseAlphaMax(0.8);
+		projector2.setNoiseAlphaMax(0.8);
+		
 		ldpcDec = new LdpcDecoder(); 
 
 		timer = new Timer(TIMER_PERIOD_MS, this);
@@ -85,16 +86,13 @@ public class SentencesAnimator implements ActionListener {
 		
 		int curModTime = (time % decoder_iteration_period);
 		if (curModTime == 0) {
-			q0 = ldpcDec.nextIteration();
-			per = (float)ldpcDec.getPER();
-		    
+			ldpcDec.nextIteration();
+			//per = (float)ldpcDec.getPER(); // not used right now		    
 			//System.out.println("per = "+per);
 		}
-		//else { // partial copy of q0
-			projector1.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);  
-		    projector2.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);
-			
-		//}		
+		// partial copy of q0
+		projector1.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);  
+		projector2.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);	
 	    lastModTime = curModTime;
 		
 		// make alpha evolve towards one sentence only with sine modulation waning off:		
@@ -130,7 +128,7 @@ public class SentencesAnimator implements ActionListener {
 		projector2.setAlpha((1-alpha) * chaosIntensity); 
 		//projector1.setAlpha(1.0f);
 		//projector2.setAlpha(1.0f);
-
+		
 		projector1.repaint();
 		projector2.repaint();
 
