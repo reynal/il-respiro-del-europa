@@ -19,6 +19,36 @@ MIXER=Unknown USB Audio Device
 # camera USB sur RPi:
 #MIXER=U0x46d0x825 [plughw:1,0]
 #
+# ==== software ====
+#
 # window size: 
 WINDOW_SIZE=fullscreen
 #WINDOW_SIZE=debug
+#
+# microphone threshold:
+SILENCE_THRESHOLD_DB=-20
+#
+# ca change de phrase quand chaos > HIGH tout en augmentant
+# il faut ensuite repasse en dessous de LOW pour reseter !
+CHAOS_NEW_SENTENCES_THR_HIGH=0.9
+CHAOS_NEW_SENTENCES_THR_LOW=0.5
+#
+# ca passe en windwave chaos si chaos > ce seuil
+CHAOS_WW_THR=0.8
+#
+# windwave timings:
+# T en ms
+# offset en % (0-100)
+# duty en ms
+WW_T=5000
+WW_OFFSET0=0
+WW_OFFSET1=20
+WW_OFFSET2=40
+WW_OFFSET3=60
+WW_DUTY0=2000
+WW_DUTY1=2000
+WW_DUTY2=2000
+WW_DUTY3=3000
+
+
+
