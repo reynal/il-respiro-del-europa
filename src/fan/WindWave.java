@@ -3,6 +3,7 @@ package fan;
 import java.util.*;
 import java.util.logging.Logger;
 
+import application.Preferences;
 import application.UserInterface;
 
 /**
@@ -19,35 +20,22 @@ public class WindWave {
 	private Timer timer;
 	private State state;
 	
-	public static final double BREATHE_THR = 0.7;  // breathe below, chaos above
-	public static final double GENTLE_THR = 0.7; // gentle below
-	public static final double IDLE_THR = 0.8; // idle below
-	
-	public double breath_threshold = BREATHE_THR;
-	public double gentle_threshold = GENTLE_THR;
-	public double idle_threshold = IDLE_THR;
+	public double chaosThreshold = 0.9;
 	
 	public static enum State {
-		//    ms	%	ms		%		ms		%		ms		%		ms
-		//    T		Offset1 Duty1  	Offset2 Duty2   Offset3 Duty3   Offset4 Duty4
-		CHAOS(5000, 	0, 	2000, 	20, 	2000, 	40, 	2000, 	60, 	3000),
-		BREATHE(20000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
-		GENTLE(10000, 	0, 		10, 	25, 	10, 	50, 	10, 	75, 	10),
-		IDLE(200000, 	0, 		1, 		25, 	10, 	50, 	10, 	75, 	10);
-		
-		public int T, offset0, duty0, offset1, duty1, offset2, duty2, offset3, duty3; // offset et duty sont en percentage de T (entre 0 et 100)
-		State(int T, int offset0, int duty0, int offset1, int duty1, int offset2, int duty2, int offset3, int duty3){
-			this.T=T;
-			this.offset0=offset0;
-			this.offset1=offset1;
-			this.offset2=offset2;
-			this.offset3=offset3;
-			this.duty0=duty0;
-			this.duty1=duty1;
-			this.duty2=duty2;
-			this.duty3=duty3;
-		}
+		CHAOS,
+		IDLE;
 	}
+	
+	private int T=5000;
+	private int offset0=0; // %
+	private int offset1=20;
+	private int offset2=40;
+	private int offset3=60;
+	private int duty0=2000; // ms
+	private int duty1=2000;
+	private int duty2=2000;
+	private int duty3=3000;
 	
 
 	private double chaosIntensity; // set by audio thread depending on breath detection
@@ -60,6 +48,16 @@ public class WindWave {
 	public WindWave(UserInterface ui) {
 		this.ui = ui;
 		if (ui!=null) ui.setWindWave(this);
+		this.chaosThreshold = Preferences.getPreferences().getDoubleProperty(Preferences.Key.CHAOS_WW_THR);
+		this.T = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_T);
+		this.offset0 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_OFFSET0);
+		this.offset1 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_OFFSET1);
+		this.offset2 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_OFFSET2);
+		this.offset3 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_OFFSET3);
+		this.duty0 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_DUTY0);
+		this.duty1 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_DUTY1);
+		this.duty2 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_DUTY2);
+		this.duty3 = Preferences.getPreferences().getIntProperty(Preferences.Key.WW_DUTY3);
 		fans = new Fan[4];
 		fans[0] = new Fan(Fan.FAN_0);
 		fans[1] = new Fan(Fan.FAN_1);
@@ -111,10 +109,10 @@ public class WindWave {
 			return; // pour le moment ca s'arrete totalement
 		}
 		
-		schedule(0, state.T, state.offset0, state.duty0);
-		schedule(1, state.T, state.offset1, state.duty1);
-		schedule(2, state.T, state.offset2, state.duty2);
-		schedule(3, state.T, state.offset3, state.duty3);
+		schedule(0, T, offset0, duty0);
+		schedule(1, T, offset1, duty1);
+		schedule(2, T, offset2, duty2);
+		schedule(3, T, offset3, duty3);
 
 	}
 	
@@ -129,10 +127,7 @@ public class WindWave {
 	public void setChaosIntensity(double intensity) {
 		
 		chaosIntensity = intensity;
-		
-		if (chaosIntensity < this.idle_threshold) setState(State.IDLE);
-		else if (chaosIntensity < this.gentle_threshold) setState(State.GENTLE);
-		else if (chaosIntensity < this.breath_threshold) setState(State.BREATHE);
+		if (chaosIntensity < this.chaosThreshold) setState(State.IDLE);
 		else setState(State.CHAOS);
 		
 	}

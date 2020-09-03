@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import javax.swing.Timer;
 
+import application.Preferences;
 import application.UserInterface;
 
 /**
@@ -39,6 +40,10 @@ public class SentencesAnimator implements ActionListener {
 	private float per;
 	
 	private double chaosIntensity; // set by audio thread depending on breath detection
+	private double chaosIntensityNewSentencesThresholdHIGH = 0.9; // with hysteresis
+	private double chaosIntensityNewSentencesThresholdLOW = 0.1;
+	private boolean isCanPickNewSentence = true; // pour gerer l'hysteresis
+	
 	private double meanAlpha = 0.5;
 	private double deltaMeanAlpha;
 	private double ampSine; // modulation of alpha, aka sin(wt)
@@ -51,6 +56,8 @@ public class SentencesAnimator implements ActionListener {
 		
 		this.ui = ui;
 		if (ui!= null) ui.setSentencesAnimator(this);
+		chaosIntensityNewSentencesThresholdHIGH = Preferences.getPreferences().getDoubleProperty(Preferences.Key.CHAOS_NEW_SENTENCES_THR_HIGH);
+		chaosIntensityNewSentencesThresholdLOW = Preferences.getPreferences().getDoubleProperty(Preferences.Key.CHAOS_NEW_SENTENCES_THR_LOW);
 		this.time = 0;
 		lastModTime = 0;
 		sentencesFileReader = new SentencesFileReader();
@@ -146,17 +153,19 @@ public class SentencesAnimator implements ActionListener {
 	 */
 	public void setChaosIntensity(double intensity) {
 		
-		// if sudden increase:
-		if (intensity > chaosIntensity) {
-			
-			if (intensity > 0.5) pickNewSentencePair();
-			
+		// si chaos > HIGH et que precedemment on est a un moment passe en dessous de LOW, c'est ok !
+		// sinon il faut attendre de passer en dessous de LOW pour remettre le "flag de permission" a true:
+		if (isCanPickNewSentence  && intensity > this.chaosIntensityNewSentencesThresholdHIGH) {
+				pickNewSentencePair();
+				isCanPickNewSentence = false; // hysteresis mgmt
+		}
+		
+		if (intensity < this.chaosIntensityNewSentencesThresholdLOW) {
+			isCanPickNewSentence = true;
 		}
 		
 		this.chaosIntensity = intensity;
-		
-		// TODO : do something !
-		
+				
 	}
 	
 	private void pickNewSentencePair() {
@@ -170,6 +179,10 @@ public class SentencesAnimator implements ActionListener {
 		ldpcDec.initState();
 		projector1.messUpDisplay(ldpcDec.q0);  // full copy of q0
 	    projector2.messUpDisplay(ldpcDec.q0);
+	    if (this.ui != null) {
+	    	ui.setSentence1(ss[0]);
+	    	ui.setSentence2(ss[1]);
+	    }
 		
 		LOGGER.info("NEW SENTENCE PAIR:" + ss[0] + " & " + ss[1]);
 	}

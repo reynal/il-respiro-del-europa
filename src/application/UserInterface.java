@@ -23,7 +23,7 @@ public class UserInterface extends JFrame {
 	private Box mainPanel;
 	
 	private JLabel microphoneLevelLBL, microphoneStatutLBL, breathForceLBL, chaosIntensityLBL;
-	private JLabel windWaveStateLBL;
+	private JLabel windWaveStateLBL, sentence1LBL, sentence2LBL;
 		
 	/**
 	 * 
@@ -40,28 +40,30 @@ public class UserInterface extends JFrame {
 		microphoneLevelLBL = addJLabel("Input level (dB): ");
 		breathForceLBL = addJLabel("Breath force: ");
 		chaosIntensityLBL = addJLabel("Chaos intensity: ");
-		addJButton("(Force breath by value below)", e -> chaosDynamics.forceBreath());
-		addJSpinner("Breath force value (%)", e -> chaosDynamics.breathForceValue=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
-		addJButton("(Force chaos to value below)", e -> chaosDynamics.forceChaosIntensity());
-		addJSpinner("Chaos force value (%)", e -> chaosDynamics.chaosForceValue=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
-		addJSpinner("idle below (%)", e -> windWave.idle_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
-		addJSpinner("gentle below (%)", e -> windWave.gentle_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		sentence1LBL = addJLabel("Phrase 1: ");
+		sentence2LBL = addJLabel("Phrase 2: ");
+		//addJButton("(Force breath by value below)", e -> chaosDynamics.forceBreath());
+		//addJSpinner("Breath force value (%)", e -> chaosDynamics.breathForceValue=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		//addJButton("(Force chaos to value below)", e -> chaosDynamics.forceChaosIntensity());
+		//addJSpinner("Chaos force value (%)", e -> chaosDynamics.chaosForceValue=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		//addJSpinner("idle below (%)", e -> windWave.idle_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
+		/*addJSpinner("gentle below (%)", e -> windWave.gentle_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
 		addJSpinner("breath below (%)", e -> windWave.breath_threshold=0.01*((Integer)((JSpinner)e.getSource()).getValue()));
 
 		addJSpinner("Decay time (s)", e -> chaosDynamics.setDecayTime((Integer)((JSpinner)e.getSource()).getValue()));
 		addJSpinner("DECODER_ITERATION_PERIOD (>=0)", e -> sentencesAnimator.decoder_iteration_period=((Integer)((JSpinner)e.getSource()).getValue()));
-		
+		*/
 		windWaveStateLBL = addJLabel("WindWave current state: ");
 		
 		
 		addJButton("WindWave: force CHAOS", e -> windWave.setState(WindWave.State.CHAOS));
-		addJButton("WindWave: force BREATH", e -> windWave.setState(WindWave.State.BREATHE));
-		addJButton("WindWave: force GENTLE", e -> windWave.setState(WindWave.State.GENTLE));
+		//addJButton("WindWave: force BREATH", e -> windWave.setState(WindWave.State.BREATHE));
+		//addJButton("WindWave: force GENTLE", e -> windWave.setState(WindWave.State.GENTLE));
 		addJButton("WindWave: force IDLE", e -> windWave.setState(WindWave.State.IDLE));
-		addWindWaveJSpinner(WindWave.State.CHAOS);
+		/*addWindWaveJSpinner(WindWave.State.CHAOS);
 		addWindWaveJSpinner(WindWave.State.BREATHE);
 		addWindWaveJSpinner(WindWave.State.GENTLE);
-		addWindWaveJSpinner(WindWave.State.IDLE);
+		addWindWaveJSpinner(WindWave.State.IDLE);*/
 		
 		//addJToggleButton("windwave", e -> System.out.println(((JToggleButton)e.getSource()).isSelected()));
 		
@@ -137,7 +139,7 @@ public class UserInterface extends JFrame {
 	
 	// --------------
 	
-	private void addWindWaveJSpinner(WindWave.State state) {
+	/*private void addWindWaveJSpinner(WindWave.State state) {
 		addJSpinner(
 				"WindWave " + state + ": T(ms)", 
 				e -> {
@@ -192,7 +194,7 @@ public class UserInterface extends JFrame {
 					state.duty3=((Integer)((JSpinner)e.getSource()).getValue());
 					windWave.setState(state);}
 				);
-	}
+	}*/
 	
 	// --------------
 	
@@ -216,6 +218,14 @@ public class UserInterface extends JFrame {
 		SwingUtilities.invokeLater(() ->  windWaveStateLBL.setText(s.toString()));
 	}
 
+	public void setSentence1(String s) {
+		SwingUtilities.invokeLater(() ->  sentence1LBL.setText(s));
+	}
+	
+	public void setSentence2(String s) {
+		SwingUtilities.invokeLater(() ->  sentence2LBL.setText(s));
+	}
+	
 	// --------------
 	
 	public static void main(String[] args) throws Exception {

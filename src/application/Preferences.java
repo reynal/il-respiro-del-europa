@@ -21,7 +21,20 @@ public class Preferences {
 	public static enum Key {
 		MIXER,
 		PLATFORM, // one of PLATFORM enum
-		WINDOW_SIZE
+		WINDOW_SIZE,
+		SILENCE_THRESHOLD_DB,
+		CHAOS_NEW_SENTENCES_THR_HIGH,
+		CHAOS_NEW_SENTENCES_THR_LOW,
+		CHAOS_WW_THR,
+		WW_T,
+		WW_OFFSET0,
+		WW_OFFSET1,
+		WW_OFFSET2,
+		WW_OFFSET3,
+		WW_DUTY0,
+		WW_DUTY1,
+		WW_DUTY2,
+		WW_DUTY3
 	}
 	
 	
@@ -72,5 +85,15 @@ public class Preferences {
 		}
 
 		return Integer.parseInt(val);
+	}
+	
+	public double getDoubleProperty(Key key) {
+		String val = properties.getProperty(key.toString());
+		if (val == null) {
+			LOGGER.severe("[Reading "+fileName+"] key (int) \"" + key + "\" non definie !");
+			System.exit(0);
+		}
+
+		return Double.parseDouble(val);
 	}
 }
