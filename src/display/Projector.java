@@ -196,7 +196,7 @@ public class Projector extends JWindow {
 			//t1 = (t1*(len/p)+len-1) % len; // end of stride
 			//System.out.println("last = "+t0+" cur = "+t1);
 			for (int i=t1; i<len; i+=p) 
-				q0i[i] = (int)(255*q0[i]*noiseAlphaMax);
+				q0i[i] = (int)(255*(q0[i]-1)*noiseAlphaMax+255);
 		}
 	}
 	
