@@ -162,20 +162,21 @@ public class LdpcDecoder {
 	/**
 	 * add BSC noise to current posterior LLRs and use as new channel noise
 	 * re-inits decoder
-	 * @param intensity is BSC-p (keep smaller than 0.09)
+	 * @param intensity is BSC-p (keep much smaller than 0.09)
 	 */
 	public void injectSomeMoreNoise(double intensity) {
+//		addBSCnoise(lambda,intensity);
 		
-		addBSCnoise(posterior, intensity);
-		for (int i=0; i<n; i++) lambda[i] = posterior[i];
-		calc_q0 (posterior);
-
-		// initialization of beta
-		for (int i = 0; i <= m - 1; i++) {
-			for (int j = 0; j <= row_weight[i] - 1; j++) {
-				beta[i][j] = 0.0;
-			}
-		}		
+//		addBSCnoise(posterior, intensity);
+//		for (int i=0; i<n; i++) lambda[i] = posterior[i];
+//		calc_q0 (posterior);
+//
+//		// initialization of beta
+//		for (int i = 0; i <= m - 1; i++) {
+//			for (int j = 0; j <= row_weight[i] - 1; j++) {
+//				beta[i][j] = 0.0;
+//			}
+//		}		
 		
 	}
 

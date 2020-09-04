@@ -104,7 +104,7 @@ public class Projector extends JWindow {
         // draw sentence in white with alpha transparency:
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha)); // alpha=0 => transparent pixel
         g.setPaint(Color.WHITE);
-        g.setFont(new Font("Serif", Font.PLAIN, 72));
+        g.setFont(new Font("Serif", Font.PLAIN, 60));
  //       int textWidth = g.getFontMetrics().stringWidth(sentence);
         this.drawString(g,sentence, 0, 0);
 
@@ -176,14 +176,18 @@ public class Projector extends JWindow {
 		if (q0 == null) return;
 		if (q0i == null) q0i = new int[q0.length]; // length shall not change
 		//System.out.println("mess up here");
-		for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]*noiseAlphaMax);
+		try {
+			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*(q0[i]-1)*noiseAlphaMax+255);
+		} catch (NullPointerException e) {
+			e.printStackTrace(); // rustine de syd ! TODO NullPointerException incomprehensible...
+		}
 	}
 	
 	public void messUpDisplay (double[] q0, int t0, int t1, int p) {	
 		if (q0 == null) return;
 		if (q0i == null) {
 			q0i = new int[q0.length]; // length shall not change
-			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]*noiseAlphaMax);
+			for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*(q0[i]-1)*noiseAlphaMax+255);
 		}
 		else {
 			//for (int i=0; i<q0.length; i++) q0i[i] = (int)(255*q0[i]*noiseAlphaMax);			

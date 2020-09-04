@@ -127,10 +127,10 @@ public class WindWave {
 		
 		if (state == State.IDLE) {
 			for (int fanIdx=0; fanIdx < 4; fanIdx++) fans[fanIdx].stop();
-			schedule(0, T_idle, offset0_idle, duty0_idle);
-			schedule(1, T_idle, offset1_idle, duty1_idle);
-			schedule(2, T_idle, offset2_idle, duty2_idle);
-			schedule(3, T_idle, offset3_idle, duty3_idle);			
+//			schedule(0, T_idle, offset0_idle, duty0_idle);
+//			schedule(1, T_idle, offset1_idle, duty1_idle);
+//			schedule(2, T_idle, offset2_idle, duty2_idle);
+//			schedule(3, T_idle, offset3_idle, duty3_idle);			
 			return; // pour le moment ca s'arrete totalement
 		}
 		

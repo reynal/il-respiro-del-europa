@@ -39,6 +39,9 @@ public class SentencesFileReader {
 			ss[0] = list.get(n+1); // 1
 			ss[1] = list.get(n); // 0
 		}
+		//TODO DBG:
+		//ss[0]="proj 1";
+		//ss[1]="proj 2";
 		return ss;
 	}
 	

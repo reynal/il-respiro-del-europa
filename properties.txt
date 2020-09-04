@@ -8,7 +8,7 @@ PLAFORM=raspberrypi
 #
 # audio mixer:
 # camera usb du mac mini de syd:
-MIXER=Unknown USB Audio Device
+#MIXER=Unknown USB Audio Device
 # carte usb de Claudio:
 #MIXER=USB Audio Device
 #MIXER=Default Audio Device
@@ -17,7 +17,7 @@ MIXER=Unknown USB Audio Device
 # shield audio Cirrus de la RPi4 (micro placé sur le shield):
 #MIXER=RPiCirrus [default]
 # camera USB sur RPi:
-#MIXER=U0x46d0x825 [plughw:1,0]
+MIXER=U0x46d0x825 [plughw:1,0]
 #
 # ==== software ====
 #
@@ -25,13 +25,25 @@ MIXER=Unknown USB Audio Device
 WINDOW_SIZE=fullscreen
 #WINDOW_SIZE=debug
 #
+# period de l'animation graphique de SentenceAnimator:
+TIMER_PERIOD_MS=40
+#
+# temps de decroissance de chaos intensity:
+DECAY_S=15
 # microphone threshold:
-SILENCE_THRESHOLD_DB=-20
+SILENCE_THRESHOLD_DB=-33
+#
+# contraste de chaque projo:
+ALPHA_MAX1=0.6
+ALPHA_MAX2=1.0
+#
+# le decodeur met a jour tous les period * TIMER_MS
+DECODER_ITERATION_PERIOD=1
 #
 # ca change de phrase quand chaos > HIGH tout en augmentant
 # il faut ensuite repasse en dessous de LOW pour reseter !
-CHAOS_NEW_SENTENCES_THR_HIGH=0.9
-CHAOS_NEW_SENTENCES_THR_LOW=0.5
+CHAOS_NEW_SENTENCES_THR_HIGH=0.95
+CHAOS_NEW_SENTENCES_THR_LOW=0.8
 #
 # ca passe en windwave chaos si chaos > ce seuil
 CHAOS_WW_THR=0.8
@@ -60,6 +72,5 @@ WW_DUTY0_IDLE=1000
 WW_DUTY1_IDLE=1000
 WW_DUTY2_IDLE=1000
 WW_DUTY3_IDLE=1000
-
 
 

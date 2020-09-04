@@ -2,6 +2,7 @@ package audio;
 
 import java.util.logging.Logger;
 
+import application.Preferences;
 import application.UserInterface;
 
 /**
@@ -16,7 +17,7 @@ public class ChaosDynamics {
 	private static final Logger LOGGER = Logger.getLogger("confLogger");
 
 	//public static final double ATTACK_S = 1.; // s
-	public static final double DECAY_S = 20.; // s
+	private double decayS = 20.; // s
 	public final static double TIMER_PERIOD_S = (double)AudioConstants.BUF_LEN / AudioConstants.SAMPLE_FREQ;
 
 
@@ -53,8 +54,9 @@ public class ChaosDynamics {
 	public ChaosDynamics(UserInterface ui) {
 		this.ui = ui;
 		ui.setChaosDynamics(this);
+		this.decayS = Preferences.getPreferences().getDoubleProperty(Preferences.Key.DECAY_S);
 		this.chaosIntensity = 0.0;
-		this.decayFactor = Math.exp(-TIMER_PERIOD_S / DECAY_S); // TODO : load DECAY_S from property file
+		this.decayFactor = Math.exp(-TIMER_PERIOD_S / decayS); // TODO : load DECAY_S from property file
 		System.out.println("decayFactor="+decayFactor);
 		// this.attackFactor = Math.exp(-TIMER_PERIOD_MS / (ATTACK_S * 1000.)); // TODO
 		// : load from property file

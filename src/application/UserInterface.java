@@ -70,8 +70,8 @@ public class UserInterface extends JFrame {
 		add(new JScrollPane(mainPanel));
 		//this.pack();
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setSize(600,dim.height/2);
-		this.setLocation(0,dim.height/2);
+		this.setSize(600,200);
+		this.setLocation(0,dim.height-200);
 		this.setVisible(true);
 	}
 	

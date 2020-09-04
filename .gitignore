@@ -5,3 +5,7 @@
 /fft.bin
 /wave.bin
 /properties.txt
+/lib/
+/properties.txt.git
+/properties.txt.old
+/.gitignore

@@ -30,11 +30,10 @@ public class SentencesAnimator implements ActionListener {
 	private Timer timer;
 	private int time;
 	private int lastModTime;
-	public static final int TIMER_PERIOD_MS = 10; // ms
-	public static final int DECODER_ITERATION_PERIOD = 10; // = 10 * TIMER_PERIOD_MS = 100ms
-	public int decoder_iteration_period = DECODER_ITERATION_PERIOD; 
+	private int timerPeriodMs = 50; // ms
+	private int decoderIterationPeriod = 10; // = 10 * TIMER_PERIOD_MS = 100ms
 	
-	private Projector projector1, projector2;
+	private Projector projector1, projector2; // 1=a l'entree, 2=au fond
 	
 	private LdpcDecoder ldpcDec;
 	private float per;
@@ -49,6 +48,8 @@ public class SentencesAnimator implements ActionListener {
 	private double ampSine; // modulation of alpha, aka sin(wt)
 	public static final double DELTA_MEAN_ALPHA = 0.001; // rate of increase of <alpha> over time (large => the final sentence gets quickly selected)
 	
+	double alphaMax1 = 1.0;
+	double alphaMax2 = 1.0;
 	/**
 	 * @throws IOException if sentence file can't be loaded 
 	 */
@@ -56,8 +57,16 @@ public class SentencesAnimator implements ActionListener {
 		
 		this.ui = ui;
 		if (ui!= null) ui.setSentencesAnimator(this);
+		
+		// loading from properties.txt:
 		chaosIntensityNewSentencesThresholdHIGH = Preferences.getPreferences().getDoubleProperty(Preferences.Key.CHAOS_NEW_SENTENCES_THR_HIGH);
 		chaosIntensityNewSentencesThresholdLOW = Preferences.getPreferences().getDoubleProperty(Preferences.Key.CHAOS_NEW_SENTENCES_THR_LOW);
+		timerPeriodMs = Preferences.getPreferences().getIntProperty(Preferences.Key.TIMER_PERIOD_MS); 
+		decoderIterationPeriod = Preferences.getPreferences().getIntProperty(Preferences.Key.DECODER_ITERATION_PERIOD);
+		alphaMax1 = Preferences.getPreferences().getDoubleProperty(Preferences.Key.ALPHA_MAX1);
+		alphaMax2 = Preferences.getPreferences().getDoubleProperty(Preferences.Key.ALPHA_MAX2);
+		
+		
 		this.time = 0;
 		lastModTime = 0;
 		sentencesFileReader = new SentencesFileReader();
@@ -70,12 +79,12 @@ public class SentencesAnimator implements ActionListener {
 			Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 			projector2.setLocation(dim.width/2+5, 0);
 		}
-		projector1.setNoiseAlphaMax(0.8);
-		projector2.setNoiseAlphaMax(0.8);
+		projector1.setNoiseAlphaMax(1);
+		projector2.setNoiseAlphaMax(1);
 		
 		ldpcDec = new LdpcDecoder(); 
 
-		timer = new Timer(TIMER_PERIOD_MS, this);
+		timer = new Timer(timerPeriodMs, this);
 		
 		start();
 
@@ -91,22 +100,23 @@ public class SentencesAnimator implements ActionListener {
 		
 		//System.out.println(chaosIntensity);
 		
-		int curModTime = (time % decoder_iteration_period);
+		int curModTime = (time % decoderIterationPeriod);
 		if (curModTime == 0) {
 			ldpcDec.nextIteration();
 			//per = (float)ldpcDec.getPER(); // not used right now		    
 			//System.out.println("per = "+per);
 		}
 		// partial copy of q0
-		projector1.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);  
-		projector2.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoder_iteration_period);	
+		projector1.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoderIterationPeriod);  
+		projector2.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoderIterationPeriod);	
 	    lastModTime = curModTime;
 		
 		// make alpha evolve towards one sentence only with sine modulation waning off:		
 		meanAlpha += deltaMeanAlpha;
 		meanAlpha = Math.max(meanAlpha, 0);
 		meanAlpha = Math.min(meanAlpha, 1);
-		ampSine *= 0.99; 
+		//ampSine *= 0.99;
+		ampSine = chaosIntensity;
 		//System.out.println("<alpha>= "+meanAlpha + ", ampSine=" + ampSine);
 
 		double a1=0.35;
@@ -115,9 +125,9 @@ public class SentencesAnimator implements ActionListener {
 		double T1 = 3.5; // secondes
 		double T2 = 1.75;
 		double T3 = 1.05;
-		double f1 = 0.001 * TIMER_PERIOD_MS / T1;
-		double f2 = 0.001 * TIMER_PERIOD_MS / T2;
-		double f3 = 0.001 * TIMER_PERIOD_MS / T3;
+		double f1 = 0.001 * timerPeriodMs / T1;
+		double f2 = 0.001 * timerPeriodMs / T2;
+		double f3 = 0.001 * timerPeriodMs / T3;
 		
 		float alpha = (float)(meanAlpha + sine(a1, f1) + sine(a2, f2) + sine(a3, f3) + per * (Math.random()-0.5));
 		alpha = Math.max(alpha, 0);
@@ -131,9 +141,9 @@ public class SentencesAnimator implements ActionListener {
         //projector2.messUpImage(q0,per*(1-alpha));
 
 		//chaosIntensity = 1.0f;
-		projector1.setAlpha(alpha * chaosIntensity);  // TODO alpha1
-		projector2.setAlpha((1-alpha) * chaosIntensity); 
-		//projector1.setAlpha(1.0f);
+		projector1.setAlpha(alphaMax1 * alpha * chaosIntensity);  // TODO debug
+		projector2.setAlpha(alphaMax2 * (1-alpha) * chaosIntensity); 
+		//projector1.setAlpha(0.0f);
 		//projector2.setAlpha(1.0f);
 		
 		projector1.repaint();
@@ -173,6 +183,13 @@ public class SentencesAnimator implements ActionListener {
 		meanAlpha = 0.5;
 		ampSine = 1.0;
 		deltaMeanAlpha = (Math.random() > 0.5 ? DELTA_MEAN_ALPHA : -DELTA_MEAN_ALPHA);
+		//deltaMeanAlpha = DELTA_MEAN_ALPHA; // TODO DBG
+		try {
+			sentencesFileReader = new SentencesFileReader();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		String[] ss = sentencesFileReader.fetchNewPair();
 		projector1.setSentence(ss[0]);
 		projector2.setSentence(ss[1]);
