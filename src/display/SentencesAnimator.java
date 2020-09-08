@@ -42,6 +42,7 @@ public class SentencesAnimator implements ActionListener {
 	private double chaosIntensityNewSentencesThresholdHIGH = 0.9; // with hysteresis
 	private double chaosIntensityNewSentencesThresholdLOW = 0.1;
 	private boolean isCanPickNewSentence = true; // pour gerer l'hysteresis
+	private boolean pickNewSentences = true; // to avoid race conditions
 	
 	private double meanAlpha = 0.5;
 	private double deltaMeanAlpha;
@@ -77,10 +78,10 @@ public class SentencesAnimator implements ActionListener {
 		else {
 			projector2 = new Projector(0);
 			Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-			projector2.setLocation(dim.width/2+5, 0);
+			projector2.setLocation(0, dim.height/2);
 		}
-		projector1.setNoiseAlphaMax(1);
-		projector2.setNoiseAlphaMax(1);
+		projector1.setNoiseAlphaMax(alphaMax1);
+		projector2.setNoiseAlphaMax(alphaMax2);
 		
 		ldpcDec = new LdpcDecoder(); 
 
@@ -88,7 +89,6 @@ public class SentencesAnimator implements ActionListener {
 		
 		start();
 
-		pickNewSentencePair();
 	}
 	
 	public void start() {
@@ -100,16 +100,29 @@ public class SentencesAnimator implements ActionListener {
 		
 		//System.out.println(chaosIntensity);
 		
-		int curModTime = (time % decoderIterationPeriod);
-		if (curModTime == 0) {
-			ldpcDec.nextIteration();
-			//per = (float)ldpcDec.getPER(); // not used right now		    
-			//System.out.println("per = "+per);
+		// following code was in setChaosIntensity and could be called asynchronously
+		if (pickNewSentences) {
+			pickNewSentencePair();
+			ldpcDec.initState();
+			projector1.messUpDisplay(ldpcDec.q0);  // full copy of q0
+		    projector2.messUpDisplay(ldpcDec.q0);
+			pickNewSentences = false;
+			time = 0;
 		}
-		// partial copy of q0
-		projector1.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoderIterationPeriod);  
-		projector2.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoderIterationPeriod);	
-	    lastModTime = curModTime;
+		else {
+			int curModTime = (time % decoderIterationPeriod);
+			if (curModTime == 0) {
+				ldpcDec.nextIteration();
+				//per = (float)ldpcDec.getPER(); // not used right now		    
+				//System.out.println("per = "+per);
+			}
+			// partial copy of q0
+			projector1.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoderIterationPeriod);  
+			projector2.messUpDisplay(ldpcDec.q0,lastModTime,curModTime,decoderIterationPeriod);	
+		    lastModTime = curModTime;
+			
+		}
+		
 		
 		// make alpha evolve towards one sentence only with sine modulation waning off:		
 		meanAlpha += deltaMeanAlpha;
@@ -166,8 +179,8 @@ public class SentencesAnimator implements ActionListener {
 		// si chaos > HIGH et que precedemment on est a un moment passe en dessous de LOW, c'est ok !
 		// sinon il faut attendre de passer en dessous de LOW pour remettre le "flag de permission" a true:
 		if (isCanPickNewSentence  && intensity > this.chaosIntensityNewSentencesThresholdHIGH) {
-				pickNewSentencePair();
-				isCanPickNewSentence = false; // hysteresis mgmt
+			pickNewSentences = true; //pickNewSentencePair();
+			isCanPickNewSentence = false; // hysteresis mgmt
 		}
 		
 		if (intensity < this.chaosIntensityNewSentencesThresholdLOW) {
@@ -193,9 +206,6 @@ public class SentencesAnimator implements ActionListener {
 		String[] ss = sentencesFileReader.fetchNewPair();
 		projector1.setSentence(ss[0]);
 		projector2.setSentence(ss[1]);
-		ldpcDec.initState();
-		projector1.messUpDisplay(ldpcDec.q0);  // full copy of q0
-	    projector2.messUpDisplay(ldpcDec.q0);
 	    if (this.ui != null) {
 	    	ui.setSentence1(ss[0]);
 	    	ui.setSentence2(ss[1]);
